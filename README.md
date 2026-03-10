@@ -36,8 +36,7 @@ Prototype/
 ├── main.ipynb               # primary Python notebook with YOLOAttendanceSystem class
 ├── yolov8n.pt               # YOLOv8 model weights
 ├── student_images/          # put student photos here (jpg/png)
-├── attendance_log.xlsx      # generated after running
-└── black/                   # virtual environment (ignored by Git)
+├── attendance_log.xlsx      # generated after running 
 ```
 
 ---
