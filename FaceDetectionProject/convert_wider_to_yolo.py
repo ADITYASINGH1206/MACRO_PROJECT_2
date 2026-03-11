@@ -11,7 +11,7 @@ def convert_wider_to_yolo(split, root_dir, output_dir):
     output_dir: Path to save the processed dataset
     """
     anno_file = os.path.join(root_dir, 'wider_face_split', f'wider_face_{split}_bbx_gt.txt')
-    img_dir = os.path.join(root_dir, f'WIDER_{split}', 'images')
+    img_dir = os.path.join(root_dir,  f'WIDER_{split}', 'images')
     
     save_img_dir = os.path.join(output_dir, 'images', split)
     save_lbl_dir = os.path.join(output_dir, 'labels', split)
