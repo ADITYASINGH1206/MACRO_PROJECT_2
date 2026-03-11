@@ -1,11 +1,13 @@
 # ignore the virtual environment in the black folder
 /prototype/
 black/
-/yolo_test/.venv
-/yolo_test/venv
 .env
-/yolo_test/DataSet
-*.jpg
-*.jpeg
-*.png
-*.bmp
+./yolo_test/.venv
+./yolo_test/DataSet
+./yolo_test/venv
+
+*jpg
+*jpeg
+*png
+
+
