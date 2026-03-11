@@ -17,7 +17,7 @@ class YOLOAttendanceSystem:
             self.model = YOLO(model_path)
             self.tracking_classes = None
         except Exception as e:
-            print(f"⚠️ Error loading custom model: {e}")
+            print(f"⚠️ Error  loading custom model: {e}")
             print("➡️ Switching to standard YOLOv8n (detects 'person').")
             self.model = YOLO("yolov8n.pt")
             self.tracking_classes = [0]
