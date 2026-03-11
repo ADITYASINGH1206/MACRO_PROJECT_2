@@ -1,13 +1,29 @@
-# ignore the virtual environment in the black folder
-/prototype/
+# Virtual environments
+.venv/
+venv/
 black/
-.env
-./yolo_test/.venv
-./yolo_test/DataSet
-./yolo_test/venv
 
+# Environment variables
+.env
+
+# Datasets & archives
+archive/
+yolo_test/DataSet/
+
+# Training runs & model weights
+yolo_test/runs/
+*.pt
+
+# Images & media
 *.jpg
 *.jpeg
 *.png
 *.zip
+
+# Generated files
+*.xlsx
+
+# Python
+__pycache__/
+*.pyc
 
