@@ -9,9 +9,10 @@ black/
 # Datasets & archives
 archive/
 yolo_test/DataSet/
-
+ 
 # Training runs & model weights
 yolo_test/runs/
+
 
 # Images & media
 *.jpg
