@@ -1,0 +1,8 @@
+# YOLOv8 Face Detection Dataset Configuration
+path: c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/dataset
+train: images/train
+val: images/val
+
+# Classes
+names:
+  0: face
