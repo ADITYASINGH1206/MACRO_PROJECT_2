@@ -6,8 +6,8 @@ black/
 ./yolo_test/DataSet
 ./yolo_test/venv
 
-*jpg
-*jpeg
-*png
-
+*.jpg
+*.jpeg
+*.png
+*.zip
 
