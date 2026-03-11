@@ -12,7 +12,7 @@ class YOLOAttendanceSystem:
         self.log_file = log_file
         self.video_source = video_source
         
-        print(f"🔄 Loading YOLO model from {model_path}...")
+        print(f"🔄Loading YOLO model from {model_path}...")
         try:
             self.model = YOLO(model_path)
             self.tracking_classes = None
