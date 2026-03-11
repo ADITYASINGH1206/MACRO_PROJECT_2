@@ -12,7 +12,7 @@ yolo_test/DataSet/
 
 # Training runs & model weights
 yolo_test/runs/
-*.pt
+
 
 # Images & media
 *.jpg
