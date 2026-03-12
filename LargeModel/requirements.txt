@@ -1,0 +1,41 @@
+# YOLOv8 Face Detection Project - Requirements
+# Install with: pip install -r requirements.txt
+
+# Core Deep Learning Framework
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+
+# YOLOv8 Object Detection
+ultralytics==8.0.198
+
+# Image and Video Processing
+opencv-python==4.8.1.78
+opencv-contrib-python>=4.7.0
+Pillow==10.1.0
+
+# Data Processing and Analysis
+numpy==1.24.3
+pandas==2.1.2
+scikit-learn==1.3.2
+scipy>=1.10.0
+
+# Visualization and Plotting
+matplotlib==3.8.2
+seaborn>=0.12.0
+tensorboard>=2.12.0
+
+# Utilities
+pyyaml==6.0.1
+tqdm==4.66.1
+
+# Optional: Advanced Logging
+# wandb>=0.14.0  # Weights & Biases (uncomment if using)
+
+# Optional: Advanced Augmentation
+# albumentations>=1.3.0  # (uncomment if using)
+
+# Development (optional)
+# jupyter>=1.0.0
+# ipython>=8.0.0
+

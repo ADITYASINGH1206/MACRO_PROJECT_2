@@ -1,0 +1,14 @@
+# Dataset configuration for WIDER FACE in YOLO format
+# This file is auto-generated but you can also manually configure it
+
+path: /path/to/LargeModel/dataset  # Dataset root
+
+train: /path/to/LargeModel/dataset/images/train  # Training images
+val: /path/to/LargeModel/dataset/images/val      # Validation images
+
+# Number of classes
+nc: 1
+
+# Class names
+names:
+  0: face
