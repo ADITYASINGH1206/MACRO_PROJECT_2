@@ -161,8 +161,8 @@ def train_face_detector():
     results = model.train(
         data=os.path.join(os.path.dirname(__file__), 'face_detection.yaml'),
         epochs=100,
-        batch=16,
-        imgsz=640,
+        batch=8,
+        imgsz=244,
         device=device,
         project=project_dir,
         name='yolov8s_face',
@@ -174,7 +174,8 @@ def train_face_detector():
         save=True,            # Save best.pt and last.pt
         save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
-        resume=resume
+        resume=resume,
+        workers=2             # Reduce workers to avoid Windows paging file errors
     )
 
     logging.info("Training completed.")

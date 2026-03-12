@@ -1,5 +1,5 @@
 # YOLOv8 Face Detection Dataset Configuration
-path: ./dataset
+path: D:/MACRO_PROJECT_2/FaceDetectionProject/dataset
 train: images/train
 val: images/val
 
