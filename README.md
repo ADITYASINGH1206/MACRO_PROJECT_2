@@ -3,7 +3,6 @@
 This is a simple prototype that uses **YOLO‑v8** for person tracking and **face_recognition** for identifying students from a webcam feed.  
 When a known face appears,  the system logs the student’s name, tracking ID, and timestamp to an Excel file.
 
----
 
 ## 🔍 Features
 
