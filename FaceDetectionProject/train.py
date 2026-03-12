@@ -10,79 +10,130 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/training.log"),
+        logging.FileHandler(os.path.join(os.path.dirname(__file__), "training.log")),
         logging.StreamHandler()
     ]
 )
 
 class TrainingMonitor:
-    def __init__(self, output_csv="c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/metrics.csv"):
+    def __init__(self, output_csv=os.path.join(os.path.dirname(__file__), "metrics.csv")):
         self.output_csv = output_csv
         self.metrics_data = []
 
-    def on_train_epoch_end(self, trainer):
-        # Extract metrics from trainer
+    def on_fit_epoch_end(self, trainer):
+        """Called after both training and validation for each epoch."""
         metrics = trainer.metrics
         epoch = trainer.epoch
-        
-        # YOLOv8 metrics keys might vary slightly, but generally:
-        # metrics['metrics/precision(B)'], metrics['metrics/recall(B)'], etc.
-        
+
+        # Extract individual train losses
+        train_box = trainer.loss_items[0].item() if hasattr(trainer, 'loss_items') and trainer.loss_items is not None else 0
+        train_cls = trainer.loss_items[1].item() if hasattr(trainer, 'loss_items') and trainer.loss_items is not None and len(trainer.loss_items) > 1 else 0
+        train_dfl = trainer.loss_items[2].item() if hasattr(trainer, 'loss_items') and trainer.loss_items is not None and len(trainer.loss_items) > 2 else 0
+
+        # Extract individual val losses
+        val_box = metrics.get('val/box_loss', 0)
+        val_cls = metrics.get('val/cls_loss', 0)
+        val_dfl = metrics.get('val/dfl_loss', 0)
+
+        # Detection performance metrics
+        precision = metrics.get('metrics/precision(B)', 0)
+        recall = metrics.get('metrics/recall(B)', 0)
+        f1 = 2 * (precision * recall) / (precision + recall + 1e-9)
+        mAP50 = metrics.get('metrics/mAP50(B)', 0)
+        mAP50_95 = metrics.get('metrics/mAP50-95(B)', 0)
+
         epoch_metrics = {
             "epoch": epoch + 1,
-            "train_loss": trainer.loss_items[0].item() if hasattr(trainer, 'loss_items') else 0,
-            "val_loss": metrics.get('val/box_loss', 0) + metrics.get('val/cls_loss', 0) + metrics.get('val/dfl_loss', 0),
-            "precision": metrics.get('metrics/precision(B)', 0),
-            "recall": metrics.get('metrics/recall(B)', 0),
-            "f1": 2 * (metrics.get('metrics/precision(B)', 0) * metrics.get('metrics/recall(B)', 0)) / 
-                  (metrics.get('metrics/precision(B)', 0) + metrics.get('metrics/recall(B)', 0) + 1e-9),
-            "mAP50": metrics.get('metrics/mAP50(B)', 0),
-            "mAP50-95": metrics.get('metrics/mAP50-95(B)', 0)
+            # Train losses (individual + total)
+            "train_box_loss": round(train_box, 5),
+            "train_cls_loss": round(train_cls, 5),
+            "train_dfl_loss": round(train_dfl, 5),
+            "train_total_loss": round(train_box + train_cls + train_dfl, 5),
+            # Val losses (individual + total)
+            "val_box_loss": round(val_box, 5),
+            "val_cls_loss": round(val_cls, 5),
+            "val_dfl_loss": round(val_dfl, 5),
+            "val_total_loss": round(val_box + val_cls + val_dfl, 5),
+            # Performance metrics
+            "precision": round(precision, 5),
+            "recall": round(recall, 5),
+            "f1": round(f1, 5),
+            "mAP50": round(mAP50, 5),
+            "mAP50-95": round(mAP50_95, 5),
         }
-        
+
         self.metrics_data.append(epoch_metrics)
         df = pd.DataFrame(self.metrics_data)
         df.to_csv(self.output_csv, index=False)
-        
-        logging.info(f"Epoch {epoch+1} Metrics: {epoch_metrics}")
+
+        logging.info(
+            f"Epoch {epoch+1} | "
+            f"Train Loss: {epoch_metrics['train_total_loss']:.4f} (box={train_box:.4f} cls={train_cls:.4f} dfl={train_dfl:.4f}) | "
+            f"Val Loss: {epoch_metrics['val_total_loss']:.4f} | "
+            f"P={precision:.4f} R={recall:.4f} F1={f1:.4f} | "
+            f"mAP50={mAP50:.4f} mAP50-95={mAP50_95:.4f}"
+        )
 
 def plot_metrics(csv_path):
     df = pd.read_csv(csv_path)
     epochs = df['epoch']
     
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(18, 12))
     
-    # Loss plot
-    plt.subplot(2, 3, 1)
-    plt.plot(epochs, df['train_loss'], label='Train Loss')
-    plt.plot(epochs, df['val_loss'], label='Val Loss')
-    plt.title('Loss vs Epoch')
+    # Train loss breakdown
+    plt.subplot(2, 4, 1)
+    plt.plot(epochs, df['train_box_loss'], label='Box')
+    plt.plot(epochs, df['train_cls_loss'], label='Cls')
+    plt.plot(epochs, df['train_dfl_loss'], label='DFL')
+    plt.title('Train Loss Components')
+    plt.xlabel('Epoch')
+    plt.legend()
+
+    # Total loss comparison
+    plt.subplot(2, 4, 2)
+    plt.plot(epochs, df['train_total_loss'], label='Train')
+    plt.plot(epochs, df['val_total_loss'], label='Val')
+    plt.title('Total Loss: Train vs Val')
+    plt.xlabel('Epoch')
     plt.legend()
     
+    # Val loss breakdown
+    plt.subplot(2, 4, 3)
+    plt.plot(epochs, df['val_box_loss'], label='Box')
+    plt.plot(epochs, df['val_cls_loss'], label='Cls')
+    plt.plot(epochs, df['val_dfl_loss'], label='DFL')
+    plt.title('Val Loss Components')
+    plt.xlabel('Epoch')
+    plt.legend()
+
     # Precision plot
-    plt.subplot(2, 3, 2)
+    plt.subplot(2, 4, 4)
     plt.plot(epochs, df['precision'], label='Precision', color='g')
     plt.title('Precision vs Epoch')
+    plt.xlabel('Epoch')
     
     # Recall plot
-    plt.subplot(2, 3, 3)
+    plt.subplot(2, 4, 5)
     plt.plot(epochs, df['recall'], label='Recall', color='b')
     plt.title('Recall vs Epoch')
+    plt.xlabel('Epoch')
     
     # F1 plot
-    plt.subplot(2, 3, 4)
+    plt.subplot(2, 4, 6)
     plt.plot(epochs, df['f1'], label='F1 Score', color='r')
     plt.title('F1 Score vs Epoch')
+    plt.xlabel('Epoch')
     
     # mAP plot
-    plt.subplot(2, 3, 5)
+    plt.subplot(2, 4, 7)
     plt.plot(epochs, df['mAP50'], label='mAP@50')
     plt.plot(epochs, df['mAP50-95'], label='mAP@50-95')
     plt.title('mAP vs Epoch')
+    plt.xlabel('Epoch')
     plt.legend()
     
     plt.tight_layout()
-    plt.savefig("c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/training_plots.png")
+    plt.savefig(os.path.join(os.path.dirname(__file__), "training_plots.png"), dpi=150)
     plt.show()
 
 def train_face_detector():
@@ -93,51 +144,41 @@ def train_face_detector():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     logging.info(f"Using device: {device}")
 
-    # 3. Transfer Learning Strategy: Freeze Backbone
-    # YOLOv8 backbone is usually layers 0-9
-    def freeze_backbone(model):
-        for i, (name, param) in enumerate(model.model.named_parameters()):
-            if i < 100: # Heuristic for backbone layers in s-model, 
-                         # better to use model.model.parameters() index if known
-                param.requires_grad = False
-        logging.info("Backbone layers frozen for initial fine-tuning.")
-
-    # Note: Ultralytics has a 'freeze' argument in train() which is easier
-    # freeze=10 will freeze first 10 layers (backbone)
-
-    # 4. Monitoring setup
-    monitor = TrainingMonitor()
-    model.add_callback("on_train_epoch_end", monitor.on_train_epoch_end)
-
-    # 5. Start Training
-    # To resume training, set resume=True and load last.pt instead of yolov8s.pt
-    last_ckpt = 'c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/face_detection_run/yolov8s_face/weights/last.pt'
+    # 3. Check for resume from checkpoint
+    project_dir = os.path.join(os.path.dirname(__file__), 'face_detection_run')
+    last_ckpt = os.path.join(project_dir, 'yolov8s_face', 'weights', 'last.pt')
     resume = os.path.exists(last_ckpt)
     
     if resume:
-        logging.info("Resuming training from last checkpoint.")
+        logging.info(f"Resuming training from checkpoint: {last_ckpt}")
         model = YOLO(last_ckpt)
 
+    # 4. Monitoring setup — add callback AFTER potential model reload
+    monitor = TrainingMonitor()
+    model.add_callback("on_fit_epoch_end", monitor.on_fit_epoch_end)
+
+    # 5. Start Training
     results = model.train(
-        data='c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/face_detection.yaml',
+        data=os.path.join(os.path.dirname(__file__), 'face_detection.yaml'),
         epochs=100,
         batch=16,
         imgsz=640,
         device=device,
-        project='face_detection_run',
+        project=project_dir,
         name='yolov8s_face',
-        freeze=10, # Freeze backbone
-        patience=20, # Early stopping
-        lr0=0.01, # Initial learning rate
-        optimizer='AdamW', # Robust optimizer
+        freeze=10,            # Freeze backbone for transfer learning
+        patience=20,          # Early stopping after 20 epochs with no improvement
+        lr0=0.01,             # Initial learning rate
+        optimizer='AdamW',
         plots=True,
-        save=True,
+        save=True,            # Save best.pt and last.pt
+        save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
         resume=resume
     )
 
     logging.info("Training completed.")
-    plot_metrics("c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/metrics.csv")
+    plot_metrics(os.path.join(os.path.dirname(__file__), "metrics.csv"))
 
 if __name__ == "__main__":
     train_face_detector()

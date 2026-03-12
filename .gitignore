@@ -27,3 +27,8 @@ yolo_test/runs/
 __pycache__/
 *.pyc
 
+FaceDetectionProject/dataset/
+FaceDetectionProject/face_detection_run/
+FaceDetectionProject/training.log
+FaceDetectionProject/metrics.csv
+FaceDetectionProject/training_plots.png

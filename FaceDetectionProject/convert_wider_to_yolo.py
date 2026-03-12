@@ -10,8 +10,8 @@ def convert_wider_to_yolo(split, root_dir, output_dir):
     root_dir: Path to WIDER FACE root (containing wider_face_split/ and WIDER_train/ etc)
     output_dir: Path to save the processed dataset
     """
-    anno_file = os.path.join(root_dir, 'wider_face_split', f'wider_face_{split}_bbx_gt.txt')
-    img_dir = os.path.join(root_dir,  f'WIDER_{split}', 'images')
+    anno_file = os.path.join(root_dir, 'wider_face_split', 'wider_face_split', f'wider_face_{split}_bbx_gt.txt')
+    img_dir = os.path.join(root_dir, f'WIDER_{split}', f'WIDER_{split}', 'images')
     
     save_img_dir = os.path.join(output_dir, 'images', split)
     save_lbl_dir = os.path.join(output_dir, 'labels', split)
@@ -31,6 +31,11 @@ def convert_wider_to_yolo(split, root_dir, output_dir):
         img_path_rel = lines[idx].strip()
         num_boxes = int(lines[idx+1].strip())
         idx += 2
+        
+        # WIDER FACE format: when num_boxes == 0, there's still 1 dummy line
+        if num_boxes == 0:
+            idx += 1
+            continue
         
         # Load image to get dimensions
         full_img_path = os.path.join(img_dir, img_path_rel)
@@ -97,13 +102,11 @@ def validate_dataset(dataset_dir):
             print(f"Warning: {len(missing_imgs)} labels missing images.")
 
 if __name__ == "__main__":
-    # Example usage:
-    # Set these paths correctly before running
-    WIDER_ROOT = "path/to/wider_face" 
-    OUTPUT_ROOT = "c:/Users/ADITYA/Desktop/MITS/4thsem/Macro/FaceDetectionProject/dataset"
+    WIDER_ROOT = os.path.join(os.path.dirname(__file__), '..', 'archive')
+    OUTPUT_ROOT = os.path.join(os.path.dirname(__file__), 'dataset')
     
-    # print("Converting Training Data...")
-    # convert_wider_to_yolo('train', WIDER_ROOT, OUTPUT_ROOT)
-    # print("Converting Validation Data...")
-    # convert_wider_to_yolo('val', WIDER_ROOT, OUTPUT_ROOT)
-    # validate_dataset(OUTPUT_ROOT)
+    print("Converting Training Data...")
+    convert_wider_to_yolo('train', WIDER_ROOT, OUTPUT_ROOT)
+    print("Converting Validation Data...")
+    convert_wider_to_yolo('val', WIDER_ROOT, OUTPUT_ROOT)
+    validate_dataset(OUTPUT_ROOT)
