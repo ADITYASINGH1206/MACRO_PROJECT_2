@@ -5,6 +5,7 @@ black/
 
 # Environment variables
 .env
+package.json
 
 # Datasets & archives
 archive/
@@ -32,3 +33,6 @@ FaceDetectionProject/face_detection_run/
 FaceDetectionProject/training.log
 FaceDetectionProject/metrics.csv
 FaceDetectionProject/training_plots.png
+
+# APIs
+/After-arch/docs
