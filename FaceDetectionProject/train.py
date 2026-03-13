@@ -1,9 +1,9 @@
-import torch
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+import torch
 import pandas as pd
 import matplotlib.pyplot as plt
-from ultralytics import YOLOtics 
-import YOLO
+from ultralytics import YOLO
 import logging
 import argparse
 
@@ -189,7 +189,7 @@ def train_face_detector(
         save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
         resume=can_resume,
-        workers=4,
+        workers=0,
         # amp = True              # Use mixed precision for faster training and lower memory usage
     )
 
