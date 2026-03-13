@@ -1,8 +1,9 @@
+import torch
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from ultralytics import YOLO
-import torch
+from ultralytics import YOLOtics 
+import YOLO
 import logging
 import argparse
 
@@ -182,13 +183,14 @@ def train_face_detector(
         cos_lr=True,
         optimizer='AdamW',
         close_mosaic=15,
-        multi_scale=True,
+        multi_scale=False,
         plots=False,
         save=True,            # Save best.pt and last.pt
         save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
         resume=can_resume,
-        workers=1
+        workers=4,
+        # amp = True              # Use mixed precision for faster training and lower memory usage
     )
 
     logging.info("Training completed.")
