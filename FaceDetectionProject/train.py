@@ -175,7 +175,7 @@ def train_face_detector():
         save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
         resume=resume,
-        workers=2             # Reduce workers to avoid Windows paging file errors
+        workers=2             
     )
 
     logging.info("Training completed.")
