@@ -4,12 +4,7 @@ from tqdm import tqdm
 import shutil
 
 def convert_wider_to_yolo(split, root_dir, output_dir):
-    """
-    Converts WIDER FACE annotations to YOLO format.
-    split: 'train' or 'val'
-    root_dir: Path to WIDER FACE root (containing wider_face_split/ and WIDER_train/ etc)
-    output_dir: Path to save the processed dataset
-    """
+
     anno_file = os.path.join(root_dir, 'wider_face_split', 'wider_face_split', f'wider_face_{split}_bbx_gt.txt')
     img_dir = os.path.join(root_dir, f'WIDER_{split}', f'WIDER_{split}', 'images')
     
