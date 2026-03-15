@@ -5,6 +5,7 @@ black/
 
 # Environment variables
 .env
+.env.example
 package.json
 
 # Datasets & archives
@@ -36,3 +37,7 @@ FaceDetectionProject/training_plots.png
 
 # APIs
 /After-arch/docs
+*.bat
+*.sh
+*Dockerfile
+*.conf
