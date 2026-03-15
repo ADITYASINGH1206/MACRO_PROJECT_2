@@ -41,3 +41,8 @@ FaceDetectionProject/training_plots.png
 *.sh
 *Dockerfile
 *.conf
+
+# Node modules
+node_modules/
+**/node_modules/
+*package-lock.json
