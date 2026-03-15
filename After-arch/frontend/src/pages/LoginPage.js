@@ -45,6 +45,9 @@ function LoginPage() {
           <Button type="primary" htmlType="submit" block loading={loading}>
             Login
           </Button>
+          <Button type="link" block onClick={() => navigate('/register')}>
+            Don't have an account? Register
+          </Button>
         </Form>
       </Card>
     </div>
