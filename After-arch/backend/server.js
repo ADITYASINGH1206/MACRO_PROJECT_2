@@ -8,6 +8,7 @@ const path = require('path');
 
 // Load environment variables
 dotenv.config();
+const supabase = require('./config/supabase');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -61,8 +62,26 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+(async () => {
+  try {
+    const { data, error } = await supabase
+      .from('students')
+      .select('id')
+      .limit(1);
+
+    if (error) {
+      console.warn('Supabase connection check warning:', error.message);
+    } else {
+      console.log('Supabase connected successfully. Rows checked:', data.length);
+    }
+  } catch (err) {
+    console.error('Supabase connection check failed:', err.message || err);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+})();
 
 module.exports = app;
