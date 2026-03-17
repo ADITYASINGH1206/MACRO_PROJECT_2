@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Statistic, Row, Col, Spin, message } from 'antd';
 import { attendanceAPI } from '../api/services';
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const response = await attendanceAPI.getSummary(user.id, '1'); // Replace with actual course ID
@@ -19,10 +26,12 @@ function DashboardPage() {
       }
     };
 
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
+    fetchData();
+  }, [user, navigate]);
+
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return <Spin tip="Loading..." />;

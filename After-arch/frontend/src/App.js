@@ -22,6 +22,7 @@ function App() {
           path="/attendance"
           element={token ? <AttendancePage /> : <Navigate to="/login" />}
         />
+        <Route path="/home" element={<Navigate to={token ? '/dashboard' : '/login'} />} />
         <Route path="/" element={<Navigate to={token ? '/dashboard' : '/login'} />} />
       </Routes>
     </Router>
