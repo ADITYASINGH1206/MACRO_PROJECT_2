@@ -12,7 +12,6 @@ services:
       SUPABASE_KEY: ${SUPABASE_KEY}
       JWT_SECRET: ${JWT_SECRET}
       ML_SERVICE_URL: http://ml-service:5001
-      FRONTEND_URL: http://localhost:3000
     depends_on:
       - ml-service
     networks:
@@ -27,7 +26,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:5000
+      REACT_APP_API_URL: http://backend:5000
       REACT_APP_ENV: ${REACT_APP_ENV:-development}
     depends_on:
       - backend

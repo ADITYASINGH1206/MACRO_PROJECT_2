@@ -12,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-MODEL_PATH = os.getenv('MODEL_PATH', '../FaceDetectionProject/face_detection_run/yolov8s_face/weights/best.pt')
+MODEL_PATH = os.getenv('MODEL_PATH', 'yolov8s.pt')
 model = YOLO(MODEL_PATH) if os.path.exists(MODEL_PATH) else YOLO('yolov8s.pt')
 
 @app.route('/health', methods=['GET'])
