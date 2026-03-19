@@ -18,6 +18,9 @@ const studentRoutes = require('./routes/students');
 
 const app = express();
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Middleware
 app.use(cors());
 app.use(morgan('combined'));

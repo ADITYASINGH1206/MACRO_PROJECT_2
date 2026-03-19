@@ -9,6 +9,7 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [teacherLoading, setTeacherLoading] = useState(false);
   const [students, setStudents] = useState([]);
+  const [pictureFile, setPictureFile] = useState(null);
   const [form] = Form.useForm();
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -41,17 +42,33 @@ function DashboardPage() {
 
   const addStudent = async (values) => {
     try {
-      const newStudent = {
-        roll_number: values.roll_number,
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-        department: values.department,
-        picture: values.picture || ''
-      };
-      const response = await studentAPI.create(newStudent);
+      let response;
+
+      if (pictureFile) {
+        const formData = new FormData();
+        formData.append('roll_number', values.roll_number);
+        formData.append('name', values.name);
+        formData.append('email', values.email);
+        formData.append('phone', values.phone);
+        formData.append('department', values.department);
+        formData.append('picture', pictureFile);
+
+        response = await studentAPI.upload(formData);
+      } else {
+        const newStudent = {
+          roll_number: values.roll_number,
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          department: values.department,
+          picture: values.picture || ''
+        };
+        response = await studentAPI.create(newStudent);
+      }
+
       setStudents((prev) => [...prev, response.data.student]);
       form.resetFields();
+      setPictureFile(null);
       message.success('Student added successfully');
     } catch (err) {
       message.error('Unable to add student');
@@ -134,6 +151,17 @@ function DashboardPage() {
               <Col xs={24} sm={12}>
                 <Form.Item label="Picture URL" name="picture">
                   <Input placeholder="https://..." />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
+                <Form.Item label="Upload Picture">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setPictureFile(e.target.files[0] || null)}
+                  />
                 </Form.Item>
               </Col>
             </Row>

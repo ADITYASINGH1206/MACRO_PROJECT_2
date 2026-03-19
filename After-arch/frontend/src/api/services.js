@@ -27,18 +27,12 @@ export const attendanceAPI = {
 };
 
 export const studentAPI = {
-  getAll: () =>
-    api.get('/students'),
-
-  getById: (id) =>
-    api.get(`/students/${id}`),
-
-  create: (student) =>
-    api.post('/students', student),
-
-  update: (id, student) =>
-    api.put(`/students/${id}`, student),
-
-  delete: (id) =>
-    api.delete(`/students/${id}`)
+  getAll: () => api.get('/students'),
+  getById: (id) => api.get(`/students/${id}`),
+  create: (student) => api.post('/students', student),
+  upload: (formData) => api.post('/students/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, student) => api.put(`/students/${id}`, student),
+  delete: (id) => api.delete(`/students/${id}`)
 };
