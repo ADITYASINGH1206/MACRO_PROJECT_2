@@ -41,7 +41,7 @@ router.get('/:id', async (req, res) => {
 // Create student
 router.post('/', async (req, res) => {
   try {
-    const { roll_number, name, email, phone, department } = req.body;
+    const { roll_number, name, email, phone, department, picture } = req.body;
 
     const { data, error } = await supabase
       .from('students')
@@ -51,7 +51,8 @@ router.post('/', async (req, res) => {
           name,
           email,
           phone,
-          department
+          department,
+          picture
         }
       ])
       .select();
@@ -69,7 +70,7 @@ router.post('/', async (req, res) => {
 // Update student
 router.put('/:id', async (req, res) => {
   try {
-    const { roll_number, name, email, phone, department } = req.body;
+    const { roll_number, name, email, phone, department, picture } = req.body;
 
     const { data, error } = await supabase
       .from('students')
@@ -78,7 +79,8 @@ router.put('/:id', async (req, res) => {
         name,
         email,
         phone,
-        department
+        department,
+        picture
       })
       .eq('id', req.params.id)
       .select();
