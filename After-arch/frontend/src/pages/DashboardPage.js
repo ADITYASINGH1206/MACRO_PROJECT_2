@@ -71,7 +71,8 @@ function DashboardPage() {
       setPictureFile(null);
       message.success('Student added successfully');
     } catch (err) {
-      message.error('Unable to add student');
+      const errorMsg = err?.response?.data?.error || err?.message || 'Unknown error';
+      message.error(`Unable to add student: ${errorMsg}`);
     }
   };
 
