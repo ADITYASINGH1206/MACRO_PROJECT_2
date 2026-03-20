@@ -13,7 +13,7 @@ export const authAPI = {
 
 export const attendanceAPI = {
   detect: (formData) =>
-    api.post('/detection/detect', formData, {
+    api.post('/attendance/detect', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
 

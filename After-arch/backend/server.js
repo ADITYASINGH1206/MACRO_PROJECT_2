@@ -46,7 +46,7 @@ const upload = multer({ storage: storage });
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/attendance', attendanceRoutes);
+app.use('/api/attendance', upload.single('image'), attendanceRoutes);
 app.use('/api/detection', upload.single('image'), detectionRoutes);
 app.use('/api/students', studentRoutes);
 

@@ -25,7 +25,8 @@ router.post('/detect', async (req, res) => {
     // Send to Python ML service
     const mlResponse = await axios.post(`${ML_SERVICE_URL}/detect`, {
       image: base64Image,
-      image_name: req.file.filename
+      image_name: req.file.filename,
+      user_id: userId
     });
 
     const detections = mlResponse.data.detections || [];
@@ -34,6 +35,11 @@ router.post('/detect', async (req, res) => {
     const attendanceRecords = [];
     for (const detection of detections) {
       const { student_id, confidence } = detection;
+      const detectionStudentId = student_id || userId;
+
+      if (!detectionStudentId) {
+        continue;
+      }
 
       if (confidence > 0.7) { // Confidence threshold
         // Check if attendance already marked today
@@ -41,7 +47,7 @@ router.post('/detect', async (req, res) => {
         const { data, error } = await supabase
           .from('attendance')
           .select('*')
-          .eq('student_id', student_id)
+          .eq('student_id', detectionStudentId)
           .eq('course_id', courseId)
           .eq('date', today)
           .single();
@@ -52,7 +58,7 @@ router.post('/detect', async (req, res) => {
             .from('attendance')
             .insert([
               {
-                student_id,
+                student_id: detectionStudentId,
                 course_id: courseId,
                 date: today,
                 time: new Date().toISOString(),

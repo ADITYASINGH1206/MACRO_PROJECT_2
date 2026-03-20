@@ -25,6 +25,7 @@ def detect():
         data = request.json
         image_base64 = data.get('image')
         image_name = data.get('image_name', 'detection.jpg')
+        user_id = data.get('user_id', None)
 
         # Decode base64 image
         image_data = base64.b64decode(image_base64)
@@ -38,10 +39,20 @@ def detect():
         for result in results:
             boxes = result.boxes
             for box in boxes:
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                h, w = image_cv.shape[:2]
+                vector = [
+                    float(x1 / w),
+                    float(y1 / h),
+                    float(x2 / w),
+                    float(y2 / h),
+                    float(box.conf[0])
+                ]
                 detection = {
                     'confidence': float(box.conf[0]),
-                    'bbox': box.xyxy[0].tolist(),
-                    'student_id': None  # Will be matched with student database
+                    'bbox': [float(x1), float(y1), float(x2), float(y2)],
+                    'student_id': user_id if user_id is not None else None,
+                    'vector': vector
                 }
                 detections.append(detection)
 
@@ -71,10 +82,20 @@ def detect_file():
         for result in results:
             boxes = result.boxes
             for box in boxes:
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                h, w = image_cv.shape[:2]
+                vector = [
+                    float(x1 / w),
+                    float(y1 / h),
+                    float(x2 / w),
+                    float(y2 / h),
+                    float(box.conf[0])
+                ]
                 detection = {
                     'confidence': float(box.conf[0]),
-                    'bbox': box.xyxy[0].tolist(),
-                    'student_id': None
+                    'bbox': [float(x1), float(y1), float(x2), float(y2)],
+                    'student_id': None,
+                    'vector': vector
                 }
                 detections.append(detection)
 
