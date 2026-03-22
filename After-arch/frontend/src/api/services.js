@@ -12,10 +12,17 @@ export const authAPI = {
 };
 
 export const attendanceAPI = {
-  detect: (formData) =>
-    api.post('/attendance/detect', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+  detect: (payload, isBase64 = false) => {
+    if (isBase64) {
+      return api.post('/attendance/detect-live', payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } else {
+      return api.post('/attendance/detect', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    }
+  },
 
   getRecords: (courseId, startDate, endDate) =>
     api.get(`/attendance/records/${courseId}`, {
