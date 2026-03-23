@@ -1,9 +1,11 @@
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
-import torch
 import logging
+import argparse
 
 # Configure logging
 logging.basicConfig(
@@ -136,22 +138,30 @@ def plot_metrics(csv_path):
     plt.savefig(os.path.join(os.path.dirname(__file__), "training_plots.png"), dpi=150)
     plt.show()
 
-def train_face_detector():
+def train_face_detector(
+    model_name='yolov8s.pt',
+    epochs=120,
+    batch=4,
+    imgsz=640,
+    resume=False
+):
     # 1. Load Pretrained Weights
-    model = YOLO('yolov8s.pt')
+    model = YOLO(model_name)
     
     # 2. GPU Support
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     logging.info(f"Using device: {device}")
 
-    # 3. Check for resume from checkpoint
+    # 3. Check for resume from checkpoint (explicit opt-in)
     project_dir = os.path.join(os.path.dirname(__file__), 'face_detection_run')
     last_ckpt = os.path.join(project_dir, 'yolov8s_face', 'weights', 'last.pt')
-    resume = os.path.exists(last_ckpt)
+    can_resume = resume and os.path.exists(last_ckpt)
     
-    if resume:
+    if can_resume:
         logging.info(f"Resuming training from checkpoint: {last_ckpt}")
         model = YOLO(last_ckpt)
+    elif resume:
+        logging.warning(f"Resume requested but checkpoint not found: {last_ckpt}")
 
     # 4. Monitoring setup — add callback AFTER potential model reload
     monitor = TrainingMonitor()
@@ -160,26 +170,45 @@ def train_face_detector():
     # 5. Start Training
     results = model.train(
         data=os.path.join(os.path.dirname(__file__), 'face_detection.yaml'),
-        epochs=100,
-        batch=8,
-        imgsz=244,
+        epochs=epochs,
+        batch=batch,
+        imgsz=imgsz,
         device=device,
         project=project_dir,
         name='yolov8s_face',
-        freeze=10,            # Freeze backbone for transfer learning
-        patience=20,          # Early stopping after 20 epochs with no improvement
+        freeze=0,             # Unfreeze backbone for better domain adaptation
+        patience=40,          # Allow longer convergence on tiny-face-heavy data
         lr0=0.01,             # Initial learning rate
+        lrf=0.01,
+        cos_lr=True,
         optimizer='AdamW',
-        plots=True,
+        close_mosaic=15,
+        multi_scale=False,
+        plots=False,
         save=True,            # Save best.pt and last.pt
         save_period=5,        # Save checkpoint every 5 epochs (epoch5.pt, epoch10.pt, etc.)
         exist_ok=True,
-        resume=resume,
-        workers=2             
+        resume=can_resume,
+        workers=0,
+        # amp = True              # Use mixed precision for faster training and lower memory usage
     )
 
     logging.info("Training completed.")
     plot_metrics(os.path.join(os.path.dirname(__file__), "metrics.csv"))
 
 if __name__ == "__main__":
-    train_face_detector()
+    parser = argparse.ArgumentParser(description="Train YOLOv8 face detector")
+    parser.add_argument('--model', type=str, default='yolov8s.pt', help='Base pretrained model')
+    parser.add_argument('--epochs', type=int, default=120, help='Number of training epochs')
+    parser.add_argument('--batch', type=int, default=4, help='Batch size')
+    parser.add_argument('--imgsz', type=int, default=960, help='Training image size')
+    parser.add_argument('--resume', action='store_true', help='Resume from last checkpoint')
+    args = parser.parse_args()
+
+    train_face_detector(
+        model_name=args.model,
+        epochs=args.epochs,
+        batch=args.batch,
+        imgsz=args.imgsz,
+        resume=args.resume,
+    )

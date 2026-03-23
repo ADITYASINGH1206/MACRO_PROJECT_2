@@ -1,5 +1,7 @@
 import argparse
 import glob
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 from typing import Optional, Union
 
 import torch
