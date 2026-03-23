@@ -2,22 +2,20 @@ import { supabase } from '../config/supabaseClient.js';
 
 export const logAttendance = async (req, res) => {
     try {
-        const { student_id, course_id, timestamp, status, confidence } = req.body;
+        const { student_id, timestamp, status, confidence } = req.body;
 
-        if (!student_id || !course_id) {
-            return res.status(400).json({ error: 'Missing student_id or course_id in payload.' });
+        if (!student_id) {
+            return res.status(400).json({ error: 'Missing student_id in payload.' });
         }
 
         const logTime = timestamp || new Date().toISOString();
 
         const { data, error } = await supabase
-            .from('attendance_logs')
+            .from('attendance')
             .insert([{
-                student_id,
-                course_id,
+                user_id: student_id,
                 timestamp: logTime,
-                status: status || 'present',
-                confidence: confidence || 1.0
+                status: status || 'present'
             }])
             .select();
         
@@ -28,7 +26,7 @@ export const logAttendance = async (req, res) => {
             throw error;
         }
 
-        console.log(`[SUCCESS] Attendance logged for student ${student_id} in course ${course_id} at ${logTime}`);
+        console.log(`[SUCCESS] Attendance logged for student ${student_id} at ${logTime}`);
         return res.status(201).json({ message: 'Attendance logged successfully', data });
     } catch (err) {
         console.error('[ERROR] Error logging attendance:', err);
@@ -38,20 +36,18 @@ export const logAttendance = async (req, res) => {
 
 export const getLiveAttendance = async (req, res) => {
     try {
-        const { course_id } = req.params;
-        
+        // Without course_id, we count all live attendances today for the dashboard
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         const { data, error } = await supabase
-            .from('attendance_logs')
-            .select('student_id')
-            .eq('course_id', course_id)
+            .from('attendance')
+            .select('user_id')
             .gte('timestamp', today.toISOString());
 
         if (error) throw error;
 
-        const uniqueStudents = new Set(data.map(log => log.student_id));
+        const uniqueStudents = new Set(data.map(log => log.user_id));
         
         return res.status(200).json({ live_count: uniqueStudents.size, total_logs: data.length });
     } catch (err) {

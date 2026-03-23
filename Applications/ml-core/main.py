@@ -64,20 +64,21 @@ def get_enrolled_students(course_id):
     """Fetch structured embedding vectors from Supabase for all enrolled students"""
     if not supabase: return []
     try:
-        response = supabase.table('enrollments').select('student_id, users(id, name, embedding)').eq('course_id', course_id).execute()
+        response = supabase.table('face_data').select('user_id, embedding, profiles(full_name)').execute()
         students = []
         for row in response.data:
-            user = row.get('users', {})
-            if user and user.get('embedding'):
-                parsed_embedding = np.array(eval(user['embedding']) if isinstance(user['embedding'], str) else user['embedding'])
+            profile = row.get('profiles') or {}
+            name = profile.get('full_name', 'Unknown')
+            if row.get('embedding'):
+                parsed_embedding = np.array(eval(row['embedding']) if isinstance(row['embedding'], str) else row['embedding'])
                 students.append({
-                    'id': user['id'],
-                    'name': user['name'],
+                    'id': row['user_id'],
+                    'name': name,
                     'embedding': parsed_embedding
                 })
         return students
     except Exception as e:
-        print(f"[ERROR] Failed fetching enrollments from Supabase: {e}")
+        print(f"[ERROR] Failed fetching face data from Supabase: {e}")
         return []
 
 def match_face(face_encoding, enrolled_students, tolerance=0.6):
@@ -97,7 +98,6 @@ def send_attendance_payload(student_id):
     """Push standardized payload to Node.js backend"""
     payload = {
         "student_id": student_id,
-        "course_id": COURSE_ID,
         "timestamp": time.strftime('%Y-%m-%dT%H:%M:%S.000Z', time.gmtime()),
         "status": "present",
         "confidence": 0.95

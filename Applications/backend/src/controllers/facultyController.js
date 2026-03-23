@@ -8,27 +8,15 @@ export const addStudent = async (req, res) => {
             return res.status(400).json({ error: 'Name and email are required to register a student.' });
         }
 
-        // 1. Create User in `users` table
-        // We set the role explicitly to 'student'
+        // 1. Create User in `profiles` table
+        // We set the role explicitly to 'Student'
         const { data: userData, error: userError } = await supabase
-            .from('users')
-            .insert([{ name, email, role: 'student' }])
+            .from('profiles')
+            .insert([{ full_name: name, email, role: 'Student' }])
             .select()
             .single();
 
         if (userError) throw userError;
-
-        // 2. Enroll student in the `enrollments` table automatically
-        if (course_id) {
-            const { error: enrollError } = await supabase
-                .from('enrollments')
-                .insert([{ student_id: userData.id, course_id }]);
-            
-            if (enrollError) {
-                console.warn('[WARNING] Student created but enrollment failed:', enrollError);
-                // Non-blocking warning since user exists
-            }
-        }
 
         return res.status(201).json({ 
             message: 'Student added successfully!', 

@@ -8,10 +8,10 @@ export const login = async (req, res) => {
             return res.status(400).json({ error: 'Email and role are required.' });
         }
 
-        // Query the Users table for matching credentials
+        // Query the Profiles table for matching credentials
         const { data, error } = await supabase
-            .from('users')
-            .select('id, name, email, role')
+            .from('profiles')
+            .select('id, full_name, email, role')
             .eq('email', email)
             .eq('role', role)
             .single();
