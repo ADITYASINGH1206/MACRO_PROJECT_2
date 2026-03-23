@@ -1,0 +1,12 @@
+.attendance-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+}
+
+.attendance-container h2 {
+  margin-bottom: 16px;
+}

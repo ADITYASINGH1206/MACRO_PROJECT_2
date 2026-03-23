@@ -1,0 +1,18 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dashboard-container {
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.attendance-container {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}

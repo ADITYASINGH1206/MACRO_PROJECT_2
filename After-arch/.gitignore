@@ -1,0 +1,47 @@
+# Environment Variables
+.env
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+venv/
+env/
+.venv
+__pycache__/
+
+# Build & Dist
+build/
+dist/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# DS Store
+.DS_Store
+
+# Python
+*.pyc
+*.pyo
+*$py.class
+
+# Test Coverage
+coverage/
+.coverage
+
+# Misc
+.DS_Store
+*.bak

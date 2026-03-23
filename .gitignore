@@ -3,9 +3,12 @@
 venv/
 black/
 .continueignore
+.continueignore
 
 # Environment variables
 .env
+.env.example
+package.json
 .env.example
 package.json
 
