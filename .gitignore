@@ -2,9 +2,12 @@
 .venv/
 venv/
 black/
+.continueignore
 
 # Environment variables
 .env
+.env.example
+package.json
 
 # Datasets & archives
 archive/
@@ -13,7 +16,7 @@ FaceDetectionProject/dataset/
 WIDER_train/
 WIDER_val/
 WIDER_test/
- 
+
 # Training runs & model weights
 yolo_test/runs/
 
@@ -32,3 +35,20 @@ __pycache__/
 *.pyc
 
 FaceDetectionProject/face_detection_model/
+FaceDetectionProject/dataset/
+FaceDetectionProject/face_detection_run/
+FaceDetectionProject/training.log
+FaceDetectionProject/metrics.csv
+FaceDetectionProject/training_plots.png
+
+# APIs
+/After-arch/docs
+*.bat
+*.sh
+*Dockerfile
+*.conf
+
+# Node modules
+node_modules/
+**/node_modules/
+*package-lock.json
