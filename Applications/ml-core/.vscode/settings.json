@@ -1,0 +1,7 @@
+{
+    "python.defaultInterpreterPath": "c:\\Users\\ADITYA\\Desktop\\MITS\\4thsem\\Macro\\.venv\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "c:\\Users\\ADITYA\\Desktop\\MITS\\4thsem\\Macro\\Applications\\ml-core"
+    ],
+    "python.venvPath": "c:\\Users\\ADITYA\\Desktop\\MITS\\4thsem\\Macro\\.venv"
+}

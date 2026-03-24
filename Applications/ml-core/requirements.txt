@@ -1,7 +1,0 @@
-opencv-python
-requests
-numpy
-supabase
-python-dotenv
-setuptools==69.5.1
-face-recognition

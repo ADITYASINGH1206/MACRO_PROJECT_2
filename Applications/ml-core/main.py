@@ -13,6 +13,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Configuration & Secrets ---
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ML_CORE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(ML_CORE_DIR, ".env"))
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:3000/api/attendance")
@@ -22,8 +27,13 @@ CAMERA_ID = int(os.getenv("CAMERA_ID", 0))
 # Initialize Supabase Python Client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
-# Load YOLOv8 Model (will fallback to standard yolov8s if custom_weights.pt doesn't exist yet)
-model_path = 'custom_weights.pt' if os.path.exists('custom_weights.pt') else 'yolov8s.pt'
+# Load YOLOv8 Model (Searching in root directory)
+model_path = os.path.join(ROOT_DIR, 'best.pt')
+if not os.path.exists(model_path):
+    model_path = os.path.join(ROOT_DIR, 'yolov8s.pt')
+if not os.path.exists(model_path):
+    model_path = 'yolov8s.pt' # Final fallback to auto-download
+
 print(f"[*] Loading YOLO model from {model_path}...")
 yolo_model = YOLO(model_path)
 
