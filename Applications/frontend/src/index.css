@@ -1,56 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --color-on-secondary-fixed-variant: 61 71 87;
-    --color-surface-bright: 248 249 250;
-    --color-secondary-fixed-dim: 189 199 219;
-    --color-surface-container-low: 243 244 245;
-    --color-secondary-fixed: 217 227 247;
-    --color-primary-container: 79 70 229;
-    --color-outline-variant: 199 196 216;
-    --color-on-primary: 255 255 255;
-    --color-inverse-surface: 46 49 50;
-    --color-surface-dim: 217 218 219;
-    --color-on-secondary-fixed: 18 28 42;
-    --color-error: 186 26 26;
-    --color-surface-container-highest: 225 227 228;
-    --color-on-error: 255 255 255;
-    --color-on-secondary: 255 255 255;
-    --color-on-tertiary-fixed: 18 28 42;
-    --color-primary: 53 37 205;
-    --color-inverse-primary: 195 192 255;
-    --color-on-tertiary-container: 210 220 239;
-    --color-on-error-container: 147 0 10;
-    --color-primary-fixed: 226 223 255;
-    --color-on-primary-fixed: 15 0 105;
-    --color-surface-tint: 77 68 227;
-    --color-tertiary-container: 87 97 113;
-    --color-secondary-container: 214 224 244;
-    --color-primary-fixed-dim: 195 192 255;
-    --color-on-tertiary-fixed-variant: 61 71 86;
-    --color-surface-variant: 225 227 228;
-    --color-outline: 119 117 135;
-    --color-surface-container-high: 231 232 233;
-    --color-on-primary-fixed-variant: 51 35 204;
-    --color-surface-container-lowest: 255 255 255;
-    --color-on-primary-container: 218 215 255;
-    --color-tertiary-fixed: 217 227 246;
-    --color-surface-container: 237 238 239;
-    --color-tertiary: 63 73 89;
-    --color-on-secondary-container: 89 99 116;
-    --color-on-surface-variant: 70 69 85;
-    --color-surface: 248 249 250;
-    --color-error-container: 255 218 214;
-    --color-background: 248 249 250;
-    --color-on-tertiary: 255 255 255;
-    --color-on-background: 25 28 29;
-    --color-inverse-on-surface: 240 241 242;
-    --color-tertiary-fixed-dim: 189 199 217;
-    --color-secondary: 85 95 112;
-    --color-on-surface: 25 28 29;
+    --color-background: 248 249 252;
+    --color-surface: 248 249 252;
+    --color-on-surface: 30 41 59;
+    --color-primary: 99 102 241;
+    --color-accent: 192 193 255;
+    --font-sans: 'Inter', sans-serif;
+    --font-headline: 'Outfit', sans-serif;
+  }
+
+  .dark {
+    --color-background: 11 19 38;
+    --color-surface: 11 19 38;
+    --color-on-surface: 218 226 253;
+    --color-primary: 192 193 255;
+    --color-accent: 78 222 163;
   }
 
   .dark {
