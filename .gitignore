@@ -57,7 +57,8 @@ node_modules/
 *package-lock.json
 
 # Workflows
+.agent/
 .agents/
 _agents/
-agent/workflows/
-.agent/workflows/
+agent/
+
