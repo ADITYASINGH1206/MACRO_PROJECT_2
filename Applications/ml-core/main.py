@@ -22,7 +22,15 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:3000/api/attendance")
 COURSE_ID = os.getenv("ACTIVE_COURSE_ID", "test-course-id")
-CAMERA_ID = int(os.getenv("CAMERA_ID", 0))
+# Attempt to load VIDEO_SOURCE (file path) or fallback to CAMERA_ID (integer)
+VIDEO_SOURCE = os.getenv("VIDEO_SOURCE")
+if VIDEO_SOURCE and os.path.exists(os.path.join(ML_CORE_DIR, VIDEO_SOURCE)):
+    CAMERA_ID = os.path.join(ML_CORE_DIR, VIDEO_SOURCE)
+else:
+    try:
+        CAMERA_ID = int(os.getenv("CAMERA_ID", 0))
+    except (ValueError, TypeError):
+        CAMERA_ID = 0
 
 # Initialize Supabase Python Client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
