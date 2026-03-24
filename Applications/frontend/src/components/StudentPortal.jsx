@@ -5,7 +5,7 @@ export default function StudentPortal() {
     <div className="min-h-[calc(100vh-64px)] bg-[#0b1326] text-[#dae2fd] p-8 font-sans">
       <h1 className="text-[3.5rem] font-medium tracking-tight mb-8">Student Portal</h1>
       
-      <div className="bg-[#131b2e] rounded-xl p-8 mb-10 shadow-lg">
+      <div className="bg-[#131b2e]/70 backdrop-blur-xl border border-white/5 rounded-xl p-8 mb-10 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         <h2 className="text-[1.5rem] font-semibold mb-6 text-[#dae2fd]">Aggregate Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-[#171f33] p-8 rounded-xl flex flex-col justify-center items-center shadow-[inset_0_0_0_1px_#2d3449]">
@@ -19,7 +19,7 @@ export default function StudentPortal() {
         </div>
       </div>
 
-      <div className="bg-[#131b2e] rounded-xl p-8 shadow-lg">
+      <div className="bg-[#131b2e]/70 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         <h2 className="text-[1.5rem] font-semibold mb-6 text-[#dae2fd]">Attendance History</h2>
         <ul className="space-y-4">
           <li className="flex justify-between items-center bg-[#171f33] px-6 py-5 rounded-xl shadow-[inset_0_0_0_1px_#2d3449]">

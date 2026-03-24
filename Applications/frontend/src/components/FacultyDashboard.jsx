@@ -48,7 +48,7 @@ export default function FacultyDashboard({ user }) {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
         {/* Live Counter Card */}
-        <div className="lg:col-span-2 bg-[#131b2e] rounded-xl p-8 shadow-lg flex flex-col justify-center items-center">
+        <div className="lg:col-span-2 bg-[#131b2e]/70 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-center items-center">
           <h2 className="text-[1.125rem] font-medium mb-4 text-[#c7c4d7]">Live Class Attendance</h2>
           <div className="flex flex-col items-center justify-center p-8 bg-[#171f33] rounded-full border-4 border-[#8083ff] shadow-[0_0_40px_rgba(99,102,241,0.2)] w-56 h-56 relative animate-pulse">
               <p className="text-[3.5rem] text-[#c0c1ff] font-bold leading-none">{((liveCount/50)*100).toFixed(0)}%</p>
@@ -57,7 +57,7 @@ export default function FacultyDashboard({ user }) {
         </div>
 
         {/* Enroll New Student Form */}
-        <div className="bg-[#131b2e] rounded-xl p-8 shadow-lg flex flex-col">
+        <div className="bg-[#131b2e]/70 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col">
           <h2 className="text-[1.125rem] font-medium mb-6 text-[#c7c4d7]">Class Enrollment</h2>
           
           <form onSubmit={handleEnrollStudent} className="space-y-4 flex-1">
@@ -78,7 +78,7 @@ export default function FacultyDashboard({ user }) {
       </div>
 
       {/* Manual Override Data Table */}
-      <div className="bg-[#131b2e] rounded-xl p-8 shadow-lg">
+      <div className="bg-[#131b2e]/70 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         <h2 className="text-[1.5rem] font-semibold mb-6 text-[#dae2fd]">Manual Override Table</h2>
         <div className="overflow-hidden rounded-lg bg-[#171f33]">
             <table className="w-full text-left border-collapse">
