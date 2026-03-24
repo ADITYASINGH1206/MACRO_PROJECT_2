@@ -1,0 +1,49 @@
+# Virtual environments
+.venv/
+venv/
+black/
+
+
+# Environment variables
+.env
+.env.example
+package.json
+
+# Datasets & archives
+archive/
+yolo_test/DataSet/
+ 
+# Training runs & model weights
+yolo_test/runs/
+
+
+# Images & media
+*.jpg
+*.jpeg
+*.png
+*.zip
+
+# Generated files
+*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+
+FaceDetectionProject/dataset/
+FaceDetectionProject/face_detection_run/
+FaceDetectionProject/training.log
+FaceDetectionProject/metrics.csv
+FaceDetectionProject/training_plots.png
+
+# APIs
+/After-arch/docs
+*.bat
+*.sh
+*Dockerfile
+*.conf
+
+# Node modules
+node_modules/
+**/node_modules/
+*package-lock.json
