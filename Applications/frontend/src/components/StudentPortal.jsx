@@ -22,20 +22,10 @@ export default function StudentPortal({ user, onLogout }) {
 
   return (
     <div className="bg-background text-on-surface min-h-screen relative">
-      <button 
-        onClick={toggleTheme}
-        className="fixed bottom-24 right-6 z-[100] w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        aria-label="Toggle Theme"
-      >
-        <span className="material-symbols-outlined">
-          {isDarkMode ? 'light_mode' : 'dark_mode'}
-        </span>
-      </button>
-      
-      {currentTab === 'home' && <StudentHome user={user} onLogout={onLogout} setCurrentTab={setCurrentTab} />}
-      {currentTab === 'history' && <StudentHistory setCurrentTab={setCurrentTab} />}
-      {currentTab === 'courses' && <StudentCourses setCurrentTab={setCurrentTab} />}
-      {currentTab === 'profile' && <StudentProfile user={user} onLogout={onLogout} setCurrentTab={setCurrentTab} />}
+      {currentTab === 'home' && <StudentHome user={user} onLogout={onLogout} setCurrentTab={setCurrentTab} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+      {currentTab === 'history' && <StudentHistory setCurrentTab={setCurrentTab} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+      {currentTab === 'courses' && <StudentCourses setCurrentTab={setCurrentTab} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+      {currentTab === 'profile' && <StudentProfile user={user} onLogout={onLogout} setCurrentTab={setCurrentTab} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
     </div>
   );
 }

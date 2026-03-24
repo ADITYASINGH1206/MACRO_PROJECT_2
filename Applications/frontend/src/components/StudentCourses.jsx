@@ -1,18 +1,25 @@
 import React from 'react';
 
-export default function StudentCourses({ user, onLogout, setCurrentTab }) {
+export default function StudentCourses({ user, onLogout, setCurrentTab, isDarkMode, toggleTheme }) {
   return (
-    <div className="bg-[#11131c] text-[#e1e1ef] font-body selection:bg-primary/30 min-h-screen">
-      <header className="fixed top-0 w-full z-50 bg-[#11131c]/60 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-white/5">
+    <div className="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen">
+      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-outline/20">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/20 cursor-pointer" onClick={onLogout} title="Click to Logout">
             <img alt="User Profile" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150"/>
           </div>
-          <span className="font-manrope font-extrabold tracking-tighter text-[#bbc3ff] text-xl">The Scholarly Editorial</span>
+          <span className="font-manrope font-extrabold tracking-tighter text-primary text-xl">The Scholarly Editorial</span>
         </div>
-        <div className="flex items-center gap-6">
-          <button className="text-slate-400 hover:bg-slate-800/40 transition-colors p-2 rounded-lg scale-95 duration-200">
+        <div className="flex items-center gap-2">
+          <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
             <span className="material-symbols-outlined">search</span>
+          </button>
+          <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant" aria-label="Toggle Theme">
+            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+          </button>
+          <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
+            <span className="material-symbols-outlined">notifications</span>
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-error rounded-full"></span>
           </button>
         </div>
       </header>
@@ -85,7 +92,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="w-10 h-10 flex items-center justify-center bg-surface-container-highest rounded-lg">
-                  <span className="material-symbols-outlined text-[#bbc3ff]">architecture</span>
+                  <span className="material-symbols-outlined text-primary">architecture</span>
                 </span>
                 <span className="text-on-surface-variant font-mono text-xs">ARC-210</span>
               </div>
@@ -113,7 +120,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="w-10 h-10 flex items-center justify-center bg-surface-container-highest rounded-lg">
-                  <span className="material-symbols-outlined text-[#bbc3ff]">database</span>
+                  <span className="material-symbols-outlined text-primary">database</span>
                 </span>
                 <span className="text-on-surface-variant font-mono text-xs">CS-301</span>
               </div>
@@ -139,7 +146,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
             <div>
               <div className="flex justify-between items-start mb-6">
                 <span className="w-10 h-10 flex items-center justify-center bg-surface-container-highest rounded-lg">
-                  <span className="material-symbols-outlined text-[#bbc3ff]">psychology</span>
+                  <span className="material-symbols-outlined text-primary">psychology</span>
                 </span>
                 <span className="text-on-surface-variant font-mono text-xs">PSY-105</span>
               </div>
@@ -169,7 +176,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
         </div>
       </main>
       
-      <nav className="fixed bottom-0 left-0 w-full z-50 bg-[#11131c]/80 backdrop-blur-md flex justify-around items-center pt-3 pb-6 px-4 border-t border-white/5 shadow-[0_-12px_40px_rgba(225,225,239,0.06)]">
+      <nav className="fixed bottom-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md flex justify-around items-center pt-3 pb-6 px-4 border-t border-outline/20 shadow-[0_-12px_40px_rgba(225,225,239,0.06)]">
         <a className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-200 transition-all active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('home'); }}>
           <span className="material-symbols-outlined mb-1">home_max</span>
           <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">Home</span>
@@ -178,7 +185,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
           <span className="material-symbols-outlined mb-1">history_edu</span>
           <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">History</span>
         </a>
-        <a className="flex flex-col items-center justify-center text-[#bbc3ff] font-bold active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('courses'); }}>
+        <a className="flex flex-col items-center justify-center text-primary font-bold active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('courses'); }}>
           <span className="material-symbols-outlined mb-1" style={{fontVariationSettings: "'FILL' 1"}}>menu_book</span>
           <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">Courses</span>
         </a>
@@ -188,7 +195,7 @@ export default function StudentCourses({ user, onLogout, setCurrentTab }) {
         </a>
       </nav>
       
-      <aside className="hidden xl:flex fixed right-8 top-32 bottom-32 w-80 bg-surface-container-high/40 backdrop-blur-xl border-l border-white/5 rounded-2xl flex-col p-6 shadow-2xl">
+      <aside className="hidden xl:flex fixed right-8 top-32 bottom-32 w-80 bg-surface-container-high/40 backdrop-blur-xl border-l border-outline/20 rounded-2xl flex-col p-6 shadow-2xl">
         <div className="mb-8">
           <h4 className="font-headline font-bold text-lg text-on-surface mb-4">Academic Notice</h4>
           <div className="space-y-4">

@@ -1,21 +1,30 @@
 import React from 'react';
 
-export default function StudentHistory({ user, onLogout, setCurrentTab }) {
+export default function StudentHistory({ user, onLogout, setCurrentTab, isDarkMode, toggleTheme }) {
   return (
-    <div className="bg-[#11131c] text-[#e1e1ef] min-h-screen pb-24">
+    <div className="bg-background text-on-surface min-h-screen pb-24">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-[#11131c]/60 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-white/5">
+      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-outline/20">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest cursor-pointer" onClick={onLogout} title="Click to Logout">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest cursor-pointer border border-primary/30" onClick={onLogout} title="Click to Logout">
             <img alt="User Profile" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150"/>
           </div>
-          <h1 className="font-manrope tracking-tight font-bold text-xl text-slate-100">
-            <span className="font-manrope font-extrabold tracking-tighter text-[#bbc3ff]">Scholar Slate Pro</span>
+          <h1 className="font-manrope tracking-tight font-bold text-xl text-on-surface">
+            <span className="font-manrope font-extrabold tracking-tighter text-primary">Scholar Slate Pro</span>
           </h1>
         </div>
-        <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-800/40 transition-colors">
-          <span className="material-symbols-outlined text-[#bbc3ff]">search</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
+            <span className="material-symbols-outlined">search</span>
+          </button>
+          <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant" aria-label="Toggle Theme">
+            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+          </button>
+          <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
+            <span className="material-symbols-outlined">notifications</span>
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-error rounded-full"></span>
+          </button>
+        </div>
       </header>
       <main className="pt-24 px-6 max-w-4xl mx-auto">
         {/* Editorial Header Section */}
@@ -196,12 +205,12 @@ export default function StudentHistory({ user, onLogout, setCurrentTab }) {
       </main>
       
       {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-3 pb-6 px-4 bg-[#11131c]/80 backdrop-blur-md border-t border-white/5 shadow-[0_-12px_40px_rgba(225,225,239,0.06)]">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-3 pb-6 px-4 bg-background/80 backdrop-blur-md border-t border-outline/20 shadow-[0_-12px_40px_rgba(225,225,239,0.06)]">
         <a className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-200 transition-all active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('home'); }}>
           <span className="material-symbols-outlined">home_max</span>
           <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium mt-1">Home</span>
         </a>
-        <a className="flex flex-col items-center justify-center text-[#bbc3ff] font-bold active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('history'); }}>
+        <a className="flex flex-col items-center justify-center text-primary font-bold active:scale-90 duration-300" href="#" onClick={(e) => { e.preventDefault(); setCurrentTab('history'); }}>
           <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>history_edu</span>
           <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium mt-1">History</span>
         </a>

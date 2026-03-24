@@ -4,16 +4,16 @@ export default function FacultyDashboard({ user, onLogout }) {
   return (
     <div className="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary min-h-screen relative overflow-x-hidden">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-[#11131c] dark:bg-[#11131c] border-b border-[#46464c]/20">
+      <header className="fixed top-0 w-full z-50 bg-background dark:bg-background border-b border-[#46464c]/20">
         <div className="flex justify-between items-center px-6 py-4 w-full">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#bbc3ff]">menu_book</span>
-            <span className="text-xl font-bold tracking-tighter text-[#e1e1ef] dark:text-[#e1e1ef] font-headline">The Scholarly Editorial</span>
+            <span className="material-symbols-outlined text-primary">menu_book</span>
+            <span className="text-xl font-bold tracking-tighter text-on-surface dark:text-on-surface font-headline">The Scholarly Editorial</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <button className="text-[#bbc3ff] font-semibold font-['Inter'] text-sm tracking-wide transition-colors duration-300">Curate</button>
-            <button className="text-[#90909a] hover:text-[#e1e1ef] font-['Inter'] text-sm tracking-wide transition-colors duration-300">Research</button>
-            <button className="text-[#90909a] hover:text-[#e1e1ef] font-['Inter'] text-sm tracking-wide transition-colors duration-300">Library</button>
+            <button className="text-primary font-semibold font-['Inter'] text-sm tracking-wide transition-colors duration-300">Curate</button>
+            <button className="text-[#90909a] hover:text-on-surface font-['Inter'] text-sm tracking-wide transition-colors duration-300">Research</button>
+            <button className="text-[#90909a] hover:text-on-surface font-['Inter'] text-sm tracking-wide transition-colors duration-300">Library</button>
           </nav>
           <div className="flex items-center gap-4 border-l border-outline/20 pl-4">
             <div className="text-right hidden sm:block">
@@ -182,7 +182,7 @@ export default function FacultyDashboard({ user, onLogout }) {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
                 <span className="material-symbols-outlined text-primary">menu_book</span>
-                <span className="text-lg font-bold tracking-tighter text-[#e1e1ef] font-headline">The Scholarly Editorial</span>
+                <span className="text-lg font-bold tracking-tighter text-on-surface font-headline">The Scholarly Editorial</span>
               </div>
               <p className="text-on-surface-variant max-w-sm mb-8">A nocturnal ecosystem for the rigorous mind. Designed in London, hosted in the cloud, preserved for the future.</p>
               <div className="flex gap-4">
@@ -222,19 +222,19 @@ export default function FacultyDashboard({ user, onLogout }) {
 
       {/* BottomNavBar (Mobile) */}
       <nav className="md:hidden bg-background/60 backdrop-blur-md fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 z-50 border-t border-[#46464c]/20 shadow-[0_-12px_40px_rgba(225,225,239,0.06)]">
-        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-[#e1e1ef] transition-all scale-95 active:scale-90">
+        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-on-surface transition-all scale-95 active:scale-90">
           <span className="material-symbols-outlined">dashboard</span>
           <span className="font-['Inter'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Curate</span>
         </button>
-        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-[#e1e1ef] transition-all scale-95 active:scale-90">
+        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-on-surface transition-all scale-95 active:scale-90">
           <span className="material-symbols-outlined">menu_book</span>
           <span className="font-['Inter'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Research</span>
         </button>
-        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-[#e1e1ef] transition-all scale-95 active:scale-90">
+        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-on-surface transition-all scale-95 active:scale-90">
           <span className="material-symbols-outlined">collections_bookmark</span>
           <span className="font-['Inter'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Library</span>
         </button>
-        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-[#e1e1ef] transition-all scale-95 active:scale-90">
+        <button className="flex flex-col items-center justify-center text-[#90909a] opacity-60 hover:text-on-surface transition-all scale-95 active:scale-90">
           <span className="material-symbols-outlined">account_circle</span>
           <span className="font-['Inter'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Profile</span>
         </button>

@@ -72,7 +72,7 @@ export default function Login({ onLogin, onNavigateToRegister }) {
         <div className="w-full md:w-[440px]">
           <div className="bg-surface-container-low rounded-xl p-8 lg:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.4)] border border-outline-variant/10 relative overflow-hidden group">
             {/* Subtle Gradient Accent at top */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary to-[#293aa6] opacity-50"></div>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary to-primary-container opacity-50"></div>
             
             <div className="space-y-8">
               <div className="space-y-2">
@@ -141,7 +141,7 @@ export default function Login({ onLogin, onNavigateToRegister }) {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 px-6 bg-gradient-to-tr from-primary to-[#293aa6] text-on-primary font-headline font-bold text-sm tracking-wide rounded-lg shadow-xl shadow-primary/10 hover:opacity-90 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
+                  className="w-full py-4 px-6 bg-gradient-to-tr from-primary to-primary-container text-on-primary font-headline font-bold text-sm tracking-wide rounded-lg shadow-xl shadow-primary/10 hover:opacity-90 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
                 >
                   <span>{loading ? 'Initializing...' : 'Initialize Session'}</span>
                   {!loading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}

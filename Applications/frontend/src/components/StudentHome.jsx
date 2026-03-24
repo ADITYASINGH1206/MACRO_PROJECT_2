@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function StudentHome({ user, onLogout, setCurrentTab }) {
+export default function StudentHome({ user, onLogout, setCurrentTab, isDarkMode, toggleTheme }) {
   return (
     <div className="bg-background text-on-surface min-h-screen pb-24 selection:bg-primary/30">
       {/* TopAppBar Component */}
@@ -20,6 +20,9 @@ export default function StudentHome({ user, onLogout, setCurrentTab }) {
         <div className="flex items-center gap-2">
           <button className="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
             <span className="material-symbols-outlined text-[20px]">search</span>
+          </button>
+          <button onClick={toggleTheme} className="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" aria-label="Toggle Theme">
+            <span className="material-symbols-outlined text-[20px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
           </button>
           <button className="relative w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all">
             <span className="material-symbols-outlined text-[20px]">notifications</span>
