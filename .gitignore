@@ -55,3 +55,9 @@ FaceDetectionProject/training_plots.png
 node_modules/
 **/node_modules/
 *package-lock.json
+
+# Workflows
+.agents/
+_agents/
+agent/workflows/
+.agent/workflows/
