@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import FacultyDashboard from './components/FacultyDashboard';
 import StudentPortal from './components/StudentPortal';
 import Login from './components/Login';
+import Register from './components/Register';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleLogin = (userData, jwtToken) => {
     setUser(userData);
@@ -18,7 +20,10 @@ export default function App() {
   };
 
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    if (showRegister) {
+      return <Register onRegister={handleLogin} onNavigateToLogin={() => setShowRegister(false)} />;
+    }
+    return <Login onLogin={handleLogin} onNavigateToRegister={() => setShowRegister(true)} />;
   }
 
   return (
