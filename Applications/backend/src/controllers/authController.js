@@ -8,13 +8,14 @@ export const login = async (req, res) => {
             return res.status(400).json({ error: 'Email and role are required.' });
         }
 
-        // Query the Profiles table for matching credentials
+        // Query the Profiles table for matching credentials (normalize role to lowercase)
         const { data, error } = await supabase
             .from('profiles')
             .select('id, full_name, email, role')
             .eq('email', email)
-            .eq('role', role)
+            .eq('role', role.toLowerCase())
             .single();
+
 
         if (error || !data) {
             return res.status(401).json({ error: 'Invalid credentials or user not found.' });
@@ -42,12 +43,13 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: 'Full name, email, and role are required.' });
         }
 
-        // Insert the new user profile
+        // Insert the new user profile (normalize role to lowercase)
         const { data, error } = await supabase
             .from('profiles')
-            .insert([{ full_name, email, role }])
+            .insert([{ full_name, email, role: role.toLowerCase() }])
             .select()
             .single();
+
 
         if (error || !data) {
             return res.status(500).json({ error: error?.message || 'Registration failed or user already exists.' });
