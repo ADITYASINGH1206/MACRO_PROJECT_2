@@ -1,162 +1,243 @@
 import React from 'react';
 
-export default function StudentProfile({ user, onLogout, setCurrentTab, isDarkMode, toggleTheme }) {
-  return (
-    <div className="bg-background text-on-surface min-h-screen pb-24 selection:bg-primary selection:text-on-primary">
-      {/* TopAppBar */}
-      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-outline/20">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden ring-2 ring-primary/20">
-            <img alt="User profile portrait" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150" />
-          </div>
-          <span className="font-manrope font-extrabold tracking-tighter text-primary text-xl">Scholar Slate Pro</span>
+const TabItem = ({ icon, label, active, onClick }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 group transition-all ${active ? 'text-indigo-400' : 'text-slate-500 hover:text-slate-300'}`}>
+    <span className={`material-symbols-outlined text-[22px] ${active ? 'fill-current' : ''}`}>{icon}</span>
+    <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+  </button>
+);
+
+const TabItemEditorial = ({ icon, label, active, onClick }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 group transition-all ${active ? 'text-[#1a1a1a]' : 'text-[#8C8980] hover:text-[#1a1a1a]'}`}>
+    <span className={`material-symbols-outlined text-[20px] transition-transform group-hover:-translate-y-1 ${active ? 'fill-current' : ''}`}>{icon}</span>
+    <span className="text-[9px] font-label uppercase tracking-[0.2em]">{label}</span>
+  </button>
+);
+
+const BentoProfile = ({ user, onLogout, toggleTheme, isDarkMode, setCurrentTab, records }) => (
+  <div className="bg-[#0A0A0B] text-slate-200 min-h-screen pb-24 font-manrope">
+    {/* TopAppBar */}
+    <header className="fixed top-0 w-full z-50 bg-[#0A0A0B]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 max-w-none border-b border-white/5">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 cursor-pointer border border-white/10 hover:border-white/30 transition-all" onClick={onLogout} title="Click to Logout">
+          <img alt="User Profile" className="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150"/>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
-            <span className="material-symbols-outlined">search</span>
-          </button>
-          <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant" aria-label="Toggle Theme">
-            <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-          </button>
-          <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-error rounded-full"></span>
+        <h1 className="font-manrope tracking-tight font-bold text-xl text-white">
+          <span className="font-manrope font-extrabold tracking-tighter text-indigo-400">Scholar Slate Pro</span>
+        </h1>
+      </div>
+      <div className="flex items-center gap-2">
+        <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors text-slate-400">
+          <span className="material-symbols-outlined text-sm">search</span>
+        </button>
+        <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors text-slate-400" aria-label="Toggle Theme">
+          <span className="material-symbols-outlined text-sm">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+        </button>
+        <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors text-slate-400">
+          <span className="material-symbols-outlined text-sm">notifications</span>
+          <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+        </button>
+      </div>
+    </header>
+
+    <main className="pt-24 px-6 max-w-7xl mx-auto">
+      {/* Hero */}
+      <section className="mb-12 flex flex-col md:flex-row items-center gap-8 bg-white/[0.02] p-8 rounded-3xl border border-white/5">
+        <div className="relative group">
+          <div className="w-40 h-40 rounded-2xl overflow-hidden border border-white/10 group-hover:border-indigo-500/50 transition-all duration-500">
+            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150" alt="Avatar" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-white text-sm">photo_camera</span>
           </button>
         </div>
-      </nav>
-
-      <main className="pt-24 px-6 md:px-12 max-w-7xl mx-auto space-y-12">
-        {/* Profile Hero Section */}
-        <header className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-br from-primary to-primary-container opacity-5 blur-3xl rounded-full"></div>
-          <div className="relative flex flex-col md:flex-row items-start md:items-end gap-8 pt-8">
-            <div className="relative">
-              <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden shadow-2xl ring-4 ring-surface-container-high">
-                <img className="w-full h-full object-cover" alt="Profile" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-primary text-on-primary p-2 rounded-lg shadow-lg">
-                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-              </div>
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[11px] font-medium tracking-[0.05em] uppercase">Student</span>
-                <span className="text-on-surface-variant font-label text-sm">ID: SCH-8829-01</span>
-              </div>
-              <h1 className="font-headline text-4xl md:text-6xl font-bold tracking-tight text-on-surface">{user ? user.email.split('@')[0] : 'Julian Thorne'}</h1>
-              <p className="font-body text-xl text-on-surface-variant max-w-xl">Enrolled in Computer Science</p>
-            </div>
-            <div className="flex gap-3">
-              <button className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2.5 rounded-md font-medium text-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
-                <span className="material-symbols-outlined text-sm">edit</span>
-                Edit Profile
-              </button>
-            </div>
+        <div className="flex-1 text-center md:text-left">
+          <p className="text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-2">Authenticated Scholar</p>
+          <h2 className="text-5xl font-extrabold tracking-tighter text-white mb-2">{user?.full_name || user?.email?.split('@')[0] || 'Scholar'}</h2>
+          <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+            <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-white/5">{records?.department || 'Registry'}</span>
+            <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-white/5">Semester {records?.semester || 'N/A'}</span>
           </div>
-        </header>
+        </div>
+        <div className="flex gap-3">
+          <button className="bg-indigo-500 text-white px-8 py-3 rounded-2xl text-xs font-bold hover:bg-indigo-600 transition-all">Download Records</button>
+          <button className="bg-white/5 text-slate-400 px-4 py-3 rounded-2xl hover:bg-white/10 transition-all">
+            <span className="material-symbols-outlined text-sm">settings</span>
+          </button>
+        </div>
+      </section>
 
-        {/* Asymmetric Bento Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Left Column: Settings */}
-          <div className="md:col-span-8 space-y-6">
-            <div className="bg-surface-container-low rounded-xl p-8 space-y-8 border-b border-outline/20">
-              <div className="flex justify-between items-center">
-                <h2 className="font-headline text-2xl font-bold text-on-surface">Account Settings</h2>
-                <span className="material-symbols-outlined text-on-surface-variant">settings</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Email Address</label>
-                  <input readOnly className="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:ring-0 focus:border-primary transition-all px-0 py-2 text-on-surface font-medium" type="email" value={user?.email || "j.thorne@scholarly.edu"} />
+      {/* Bento Stats & Settings */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <div className="bg-white/[0.02] p-8 rounded-3xl border border-white/5">
+            <h3 className="text-xl font-extrabold text-white mb-8">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[
+                { label: "Email Address", value: user?.email || "Scholar Portal" },
+                { label: "Department", value: records?.department || "Unassigned" },
+                { label: "Status", value: "Active Undergraduate" },
+                { label: "Affiliation", value: "Macro Project" }
+              ].map((field, idx) => (
+                <div key={idx} className="space-y-2">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{field.label}</p>
+                  <p className="text-sm font-bold text-white tracking-tight">{field.value}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Phone Number</label>
-                  <input className="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:ring-0 focus:border-primary transition-all px-0 py-2 text-on-surface font-medium" type="text" defaultValue="+1 (555) 892-0192" />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Language</label>
-                  <select className="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:ring-0 focus:border-primary transition-all px-0 py-2 text-on-surface font-medium appearance-none">
-                    <option>English</option>
-                    <option>Spanish</option>
-                    <option>French</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Time Zone</label>
-                  <input className="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:ring-0 focus:border-primary transition-all px-0 py-2 text-on-surface font-medium" type="text" defaultValue="GMT -05:00 (EST)" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-low rounded-xl p-8 space-y-6">
-              <h2 className="font-headline text-2xl font-bold text-on-surface">Communication</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container-lowest/50 hover:bg-surface-container-lowest transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined">mail</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-on-surface">Course Alerts</p>
-                      <p className="text-xs text-on-surface-variant">Notify when grades are posted</p>
-                    </div>
-                  </div>
-                  <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
-                    <div className="absolute right-1 top-1 w-4 h-4 bg-on-primary rounded-full"></div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Column: Stats */}
-          <div className="md:col-span-4 space-y-6">
-            <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline/20 space-y-4">
-              <h3 className="font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant">Scholarly Impact</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-surface-container-high rounded-lg">
-                  <p className="text-2xl font-headline font-bold text-primary">88%</p>
-                  <p className="text-[10px] text-on-surface-variant uppercase">Attendance</p>
+          <div className="bg-white/[0.02] p-8 rounded-3xl border border-white/5">
+            <h3 className="text-xl font-extrabold text-white mb-8">Credentials & Security</h3>
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/[0.08] transition-all cursor-pointer group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400">
+                  <span className="material-symbols-outlined text-sm">shield</span>
                 </div>
-                <div className="p-4 bg-surface-container-high rounded-lg">
-                  <p className="text-2xl font-headline font-bold text-on-surface">3.98</p>
-                  <p className="text-[10px] text-on-surface-variant uppercase">Academic GPA</p>
+                <div>
+                  <p className="text-white text-xs font-bold">Two-Factor Authentication</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Enabled via Authenticator</p>
                 </div>
               </div>
-              <div className="pt-4 border-t border-outline/20">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-on-surface-variant">Degree Progress</span>
-                  <span className="text-xs font-bold text-on-surface">68%</span>
-                </div>
-                <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
-                  <div className="bg-primary h-full w-[68%]"></div>
-                </div>
-              </div>
+              <span className="material-symbols-outlined text-slate-500 group-hover:text-white transition-colors">chevron_right</span>
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all"></div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 opacity-70">Current Performance</p>
+            <p className="text-4xl font-extrabold tracking-tighter mb-1">{records?.gpa || '0.00'}</p>
+            <p className="text-xs font-bold opacity-70">Cumulative GPA</p>
+            <div className="mt-8 pt-8 border-t border-white/10">
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-2">Credits Earned</p>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-white transition-all duration-1000" style={{ width: `${Math.min((records?.total_credits / 120) * 100 || 0, 100)}%` }}></div>
+              </div>
+              <p className="text-right text-[10px] font-bold mt-2">{records?.total_credits || 0} / 120 Units</p>
+            </div>
+          </div>
+
+          <button onClick={onLogout} className="w-full py-4 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all">
+            Sign Out of Account
+          </button>
+        </div>
+      </div>
+    </main>
+
+    {/* Bottom Bar */}
+    <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-3 pb-8 px-6 bg-[#0A0A0B]/90 backdrop-blur-xl border-t border-white/5 shadow-2xl">
+      <TabItem icon="home_max" label="Home" active={false} onClick={() => setCurrentTab('home')} />
+      <TabItem icon="history_edu" label="History" active={false} onClick={() => setCurrentTab('history')} />
+      <TabItem icon="menu_book" label="Courses" active={false} onClick={() => setCurrentTab('courses')} />
+      <TabItem icon="person_2" label="Profile" active={true} onClick={() => setCurrentTab('profile')} />
+    </nav>
+  </div>
+);
+
+const EditorialProfile = ({ user, onLogout, toggleTheme, isDarkMode, setCurrentTab, records }) => (
+  <div className="bg-[#FAF9F6] text-[#1a1a1a] min-h-screen pb-24 font-body selection:bg-[#E5E2D9]">
+    {/* Minimal Nav */}
+    <header className="fixed top-0 w-full z-50 bg-[#FAF9F6]/80 backdrop-blur-md flex justify-between items-center px-8 py-6 border-b border-[#E5E2D9]">
+      <div className="flex items-center gap-6">
+        <div className="w-10 h-10 rounded-full overflow-hidden border border-[#E5E2D9] cursor-pointer" onClick={onLogout}>
+          <img alt="User" className="w-full h-full object-cover grayscale opacity-80" src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150"/>
+        </div>
+        <h1 className="font-headline text-xl tracking-tight italic font-medium">Scholar Slate</h1>
+      </div>
+      <div className="flex items-center gap-4">
+        <button className="text-[#1a1a1a] opacity-40 hover:opacity-100 transition-opacity">
+          <span className="material-symbols-outlined text-[20px]">search</span>
+        </button>
+        <button onClick={toggleTheme} className="text-[#1a1a1a] opacity-40 hover:opacity-100 transition-opacity">
+          <span className="material-symbols-outlined text-[20px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+        </button>
+        <button className="text-[#1a1a1a] opacity-40 hover:opacity-100 transition-opacity relative">
+          <span className="material-symbols-outlined text-[20px]">notifications</span>
+          <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-[#8B0000] rounded-full"></span>
+        </button>
+      </div>
+    </header>
+
+    <main className="pt-32 px-12 max-w-5xl mx-auto">
+      <section className="text-center mb-32">
+        <p className="font-label text-[10px] uppercase tracking-[0.4em] text-[#8C8980] mb-8 italic">The Scholar's Identity</p>
+        <div className="w-48 h-48 rounded-full overflow-hidden mx-auto mb-12 border border-[#E5E2D9] p-2">
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150" alt="Profile" className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-1000" />
+        </div>
+        <h2 className="font-headline text-7xl font-serif italic mb-6">{user?.full_name || user?.email?.split('@')[0] || 'Scholar'}</h2>
+        <p className="text-[#4A4941] text-xl font-medium tracking-tight mb-2">Fellow of the {records?.department || ' Registry'}</p>
+        <p className="font-label text-xs uppercase tracking-[0.2em] text-[#8C8980]">Academic Session: {records?.semester || 'Autumn'}</p>
+      </section>
+
+      {/* Profile Details - Editorial Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-24 border-t border-[#E5E2D9] pt-24 mb-32">
+        <section>
+          <h3 className="font-headline text-2xl italic mb-12 border-b border-[#E5E2D9]/50 pb-4">Biographical Notes</h3>
+          <div className="space-y-12">
+            {[
+              { label: "Correspondence", value: user?.email || "Portal Access Only" },
+              { label: "Faculty", value: records?.department || "Unassigned" },
+              { label: "Commencement", value: "Academic Year 2023" }
+            ].map((field, idx) => (
+              <div key={idx}>
+                <p className="font-label text-[9px] uppercase tracking-[0.2em] text-[#8C8980] mb-2">{field.label}</p>
+                <p className="text-lg font-medium tracking-tight">{field.value}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-      </main>
+        <section>
+          <h3 className="font-headline text-2xl italic mb-12 border-b border-[#E5E2D9]/50 pb-4">Academic Status</h3>
+          <div className="space-y-12">
+            <div>
+              <p className="font-label text-[9px] uppercase tracking-[0.2em] text-[#8C8980] mb-2">Scholastic Standing</p>
+              <p className="text-4xl font-headline italic">{parseFloat(records?.gpa) >= 3.5 ? 'Summa Cum Laude' : 'Academic Excellence'}</p>
+              <p className="text-[10px] text-[#4A4941] mt-2 italic">Current Portfolio GPA: {records?.gpa || '0.00'}</p>
+            </div>
+            <div className="pt-12 border-t border-[#E5E2D9]/50">
+              <button className="font-headline italic text-lg hover:underline underline-offset-8 decoration-[#E5E2D9]">Revise Identity Records</button>
+            </div>
+          </div>
+        </section>
+      </div>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-3 pb-6 px-4 bg-background/80 backdrop-blur-md shadow-[0_-12px_40px_rgba(225,225,239,0.06)] border-t border-outline/20">
-        <a className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-200 transition-all active:scale-90 duration-300 cursor-pointer" onClick={(e) => { e.preventDefault(); setCurrentTab('home'); }}>
-          <span className="material-symbols-outlined mb-1">home_max</span>
-          <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">Home</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-200 transition-all active:scale-90 duration-300 cursor-pointer" onClick={(e) => { e.preventDefault(); setCurrentTab('history'); }}>
-          <span className="material-symbols-outlined mb-1">history_edu</span>
-          <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">History</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-slate-500 hover:text-slate-200 transition-all active:scale-90 duration-300 cursor-pointer" onClick={(e) => { e.preventDefault(); setCurrentTab('courses'); }}>
-          <span className="material-symbols-outlined mb-1">menu_book</span>
-          <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">Courses</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-primary font-bold active:scale-90 duration-300 cursor-pointer" onClick={(e) => { e.preventDefault(); setCurrentTab('profile'); }}>
-          <span className="material-symbols-outlined mb-1" style={{ fontVariationSettings: "'FILL' 1" }}>person_2</span>
-          <span className="font-inter text-[11px] uppercase tracking-[0.05em] font-medium">Profile</span>
-        </a>
-      </nav>
-    </div>
+      <div className="text-center py-24 border-t border-[#E5E2D9]">
+        <button onClick={onLogout} className="font-label text-[10px] uppercase tracking-[0.4em] text-[#8B0000] hover:scale-105 transition-transform italic underline underline-offset-8">Relinquish Access</button>
+      </div>
+    </main>
+
+    {/* Bottom Bar - Editorial */}
+    <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-4 pb-10 px-8 bg-[#FAF9F6] border-t border-[#E5E2D9]">
+      <TabItemEditorial icon="home_max" label="Dispatch" active={false} onClick={() => setCurrentTab('home')} />
+      <TabItemEditorial icon="history_edu" label="Archive" active={false} onClick={() => setCurrentTab('history')} />
+      <TabItemEditorial icon="menu_book" label="Syllabus" active={false} onClick={() => setCurrentTab('courses')} />
+      <TabItemEditorial icon="person_2" label="Identity" active={true} onClick={() => setCurrentTab('profile')} />
+    </nav>
+  </div>
+);
+
+export default function StudentProfile({ user, onLogout, setCurrentTab, isDarkMode, toggleTheme, records }) {
+  return isDarkMode ? (
+    <BentoProfile 
+      user={user} 
+      onLogout={onLogout} 
+      toggleTheme={toggleTheme} 
+      isDarkMode={isDarkMode} 
+      setCurrentTab={setCurrentTab} 
+      records={records}
+    />
+  ) : (
+    <EditorialProfile 
+      user={user} 
+      onLogout={onLogout} 
+      toggleTheme={toggleTheme} 
+      isDarkMode={isDarkMode} 
+      setCurrentTab={setCurrentTab} 
+      records={records}
+    />
   );
 }
+
