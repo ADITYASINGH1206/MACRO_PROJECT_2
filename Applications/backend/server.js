@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import authRoutes from './src/routes/authRoutes.js';
 import attendanceRoutes from './src/routes/attendanceRoutes.js';
 import facultyRoutes from './src/routes/facultyRoutes.js';
+import studentRoutes from './src/routes/studentRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/faculty', facultyRoutes);
+app.use('/api/student', studentRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'healthy', message: 'Modular Backend API is running' });
