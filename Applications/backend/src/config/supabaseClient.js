@@ -8,4 +8,4 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'YOUR_SUPABASE_SERV
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Checking new rule
+// Checking new rules
