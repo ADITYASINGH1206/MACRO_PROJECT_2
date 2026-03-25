@@ -41,7 +41,7 @@ export default function Login({ onLogin, onNavigateToRegister }) {
       </div>
       
       {/* Main Content Shell */}
-      <main className="relative z-10 w-full max-w-6xl flex flex-col md:flex-row items-center justify-center px-6 gap-12 lg:gap-24">
+      <main className="relative z-10 w-full max-w-6xl flex flex-col md:flex-row items-center justify-center px-6 gap-12 lg:gap-24 animate-fade-up">
         {/* Branding & Editorial Content Area */}
         <div className="w-full md:w-1/2 flex flex-col space-y-8">
           <header className="space-y-4">
@@ -70,7 +70,7 @@ export default function Login({ onLogin, onNavigateToRegister }) {
         </div>
         
         {/* Login Form Container */}
-        <div className="w-full md:w-[440px]">
+        <div className="w-full md:w-[440px] animate-fade-up" style={{animationDelay: '100ms'}}>
           <div className="bg-surface-container-low rounded-xl p-8 lg:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.4)] border border-outline-variant/10 relative overflow-hidden group">
             {/* Subtle Gradient Accent at top */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary to-primary-container opacity-50"></div>

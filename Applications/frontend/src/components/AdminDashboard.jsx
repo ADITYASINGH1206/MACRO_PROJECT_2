@@ -3,21 +3,22 @@ import React, { useState } from 'react';
 export default function AdminDashboard({ user, onLogout, isDarkMode, toggleTheme }) {
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Premium Deep Blue Palette (Phase 8)
   const styles = {
-    surface: isDarkMode ? 'bg-[#0b1326]' : 'bg-[#f8f9fc]',
-    surfaceLow: isDarkMode ? 'bg-[#131b2e]' : 'bg-[#ffffff]',
-    surfaceContainer: isDarkMode ? 'bg-[#171f33]' : 'bg-[#f1f3f9]',
-    textPrimary: isDarkMode ? 'text-[#dae2fd]' : 'text-[#1e293b]',
-    textSecondary: isDarkMode ? 'text-[#c7c4d7]' : 'text-[#64748b]',
-    accentPrimary: 'text-[#c0c1ff]',
+    surface: isDarkMode ? 'bg-[#0A0F1C]' : 'bg-[#f8f9fc]',
+    surfaceLow: isDarkMode ? 'bg-[#111A2C]' : 'bg-[#ffffff]',
+    surfaceContainer: isDarkMode ? 'bg-[#15213A]' : 'bg-[#f1f3f9]',
+    textPrimary: isDarkMode ? 'text-[#F8FAFC]' : 'text-[#1e293b]',
+    textSecondary: isDarkMode ? 'text-[#94a3b8]' : 'text-[#64748b]',
+    accentPrimary: 'text-[#8283ff]',
     accentSecondary: 'text-[#4edea3]',
     accentTertiary: 'text-[#ffb783]',
   };
 
   return (
-    <div className={`${styles.surface} ${styles.textPrimary} font-inter min-h-screen transition-colors duration-500`}>
+    <div className={`${styles.surface} ${styles.textPrimary} font-sans min-h-screen transition-colors duration-300`}>
       {/* Admin Editorial Header */}
-      <header className="fixed top-0 w-full z-50 bg-opacity-80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 py-5">
+      <header className="fixed top-0 w-full z-50 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-8 py-5" style={{backgroundColor: isDarkMode ? 'rgba(10,15,28,0.9)' : 'rgba(248,249,252,0.9)', boxShadow: '0 1px 24px rgba(0,0,0,0.3)'}}>
         <div className="flex items-center gap-5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8083ff] to-[#c0c1ff] flex items-center justify-center shadow-lg">
             <span className="material-symbols-outlined text-white text-2xl">admin_panel_settings</span>
@@ -57,9 +58,9 @@ export default function AdminDashboard({ user, onLogout, isDarkMode, toggleTheme
 
       <main className="pt-32 pb-24 px-8 max-w-[1600px] mx-auto space-y-12">
         {activeTab === 'overview' && (
-          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-12">
+          <div className="animate-fade-up space-y-12">
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/5 shadow-2xl space-y-6 relative overflow-hidden group`}>
+              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/[0.07] shadow-premium hover:shadow-premium-lg space-y-6 relative overflow-hidden group transition-all duration-200`}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#8083ff]/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-[#8083ff]/10"></div>
                 <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] ${styles.textSecondary}`}>Institutional Reach</h3>
                 <div className="flex items-end gap-3">
@@ -68,7 +69,7 @@ export default function AdminDashboard({ user, onLogout, isDarkMode, toggleTheme
                 </div>
               </div>
               
-              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/5 shadow-2xl space-y-6 relative overflow-hidden group`}>
+              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/[0.07] shadow-premium hover:shadow-premium-lg space-y-6 relative overflow-hidden group transition-all duration-200`}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#4edea3]/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-[#4edea3]/10"></div>
                 <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] ${styles.textSecondary}`}>Instructional Force</h3>
                 <div className="flex items-end gap-3">
@@ -77,7 +78,7 @@ export default function AdminDashboard({ user, onLogout, isDarkMode, toggleTheme
                 </div>
               </div>
 
-              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/5 shadow-2xl flex flex-col justify-between group`}>
+              <div className={`${styles.surfaceLow} p-10 rounded-[2rem] border border-white/[0.07] shadow-premium flex flex-col justify-between transition-all duration-200 group`}>
                 <div>
                    <h3 className="text-xl font-black tracking-tight leading-none mb-3">System<br/>Commands</h3>
                    <p className={`${styles.textSecondary} text-xs leading-relaxed`}>Deploy global registries and manage institutional hierarchies.</p>
@@ -101,11 +102,11 @@ export default function AdminDashboard({ user, onLogout, isDarkMode, toggleTheme
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                    {['Computer Science', 'Quantum Ethics', 'Editorial Logic'].map(c => (
-                     <div key={c} className={`${styles.surfaceContainer} p-8 rounded-[2rem] border border-white/5 hover:border-[#c0c1ff]/30 transition-all group cursor-pointer`}>
+                     <div key={c} className={`${styles.surfaceContainer} p-8 rounded-[2rem] border border-white/[0.07] hover:border-[#8283ff]/30 transition-all duration-200 group cursor-pointer`}>
                         <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                            <span className="material-symbols-outlined text-white opacity-40">school</span>
                         </div>
-                        <h4 className="text-xl font-black tracking-tight mb-2 group-hover:text-[#c0c1ff]">{c}</h4>
+                         <h4 className="text-xl font-black tracking-tight mb-2 group-hover:text-[#8283ff] transition-colors duration-200">{c}</h4>
                         <div className="flex items-center justify-between mt-6">
                            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Faculty Assigned</span>
                            <span className={`px-3 py-1 bg-[#4edea3]/10 text-[#4edea3] rounded-full text-[9px] font-black tracking-widest`}>ACTIVE</span>

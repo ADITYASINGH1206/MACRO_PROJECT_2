@@ -11,24 +11,24 @@ export default function FacultyDashboard({
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // High-fidelity Obsidian Theme Tokens
+  // Premium Deep Blue Palette (Phase 8)
   const styles = {
-    surface: isDarkMode ? 'bg-[#0b1326]' : 'bg-[#f8f9fc]',
-    surfaceLow: isDarkMode ? 'bg-[#131b2e]' : 'bg-[#ffffff]',
-    surfaceContainer: isDarkMode ? 'bg-[#171f33]' : 'bg-[#f1f3f9]',
-    surfaceHighest: isDarkMode ? 'bg-[#2d3449]' : 'bg-[#e2e8f0]',
-    textPrimary: isDarkMode ? 'text-[#dae2fd]' : 'text-[#1e293b]',
-    textSecondary: isDarkMode ? 'text-[#c7c4d7]' : 'text-[#64748b]',
-    accentPrimary: 'text-[#c0c1ff]',
+    surface: isDarkMode ? 'bg-[#0A0F1C]' : 'bg-[#f8f9fc]',
+    surfaceLow: isDarkMode ? 'bg-[#111A2C]' : 'bg-[#ffffff]',
+    surfaceContainer: isDarkMode ? 'bg-[#15213A]' : 'bg-[#f1f3f9]',
+    surfaceHighest: isDarkMode ? 'bg-[#1e2d4a]' : 'bg-[#e2e8f0]',
+    textPrimary: isDarkMode ? 'text-[#F8FAFC]' : 'text-[#1e293b]',
+    textSecondary: isDarkMode ? 'text-[#94a3b8]' : 'text-[#64748b]',
+    accentPrimary: 'text-[#8283ff]',
     accentSecondary: 'text-[#4edea3]',
     accentTertiary: 'text-[#ffb783]',
-    gradientPrimary: 'from-[#8083ff] to-[#c0c1ff]',
+    gradientPrimary: 'from-[#8283ff] to-[#a5b4fc]',
   };
 
   return (
-    <div className={`${styles.surface} ${styles.textPrimary} font-inter selection:bg-[#c0c1ff]/30 min-h-screen transition-colors duration-500`}>
+    <div className={`${styles.surface} ${styles.textPrimary} font-sans selection:bg-primary/20 min-h-screen transition-colors duration-300`}>
       {/* Editorial Navigation Bar */}
-      <header className="fixed top-0 w-full z-50 bg-opacity-80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 py-5">
+      <header className="fixed top-0 w-full z-50 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-8 py-5" style={{backgroundColor: isDarkMode ? 'rgba(10,15,28,0.9)' : 'rgba(248,249,252,0.9)', boxShadow: '0 1px 24px rgba(0,0,0,0.3)'}}>
         <div className="flex items-center gap-5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8083ff] to-[#c0c1ff] flex items-center justify-center shadow-lg shadow-[#8083ff]/20">
             <span className="material-symbols-outlined text-white text-2xl">architecture</span>

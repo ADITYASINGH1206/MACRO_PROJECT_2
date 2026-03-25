@@ -26,14 +26,15 @@ export default function StudentPortal({ user, onLogout, isDarkMode, toggleTheme 
     if (user?.id) fetchStudentData();
   }, [user?.id]);
 
+  // Premium Deep Blue Palette (Phase 8)
   const styles = {
-    surface: isDarkMode ? 'bg-[#0b1326]' : 'bg-[#f8f9fc]',
-    surfaceLow: isDarkMode ? 'bg-[#131b2e]' : 'bg-[#ffffff]',
-    surfaceContainer: isDarkMode ? 'bg-[#171f33]' : 'bg-[#f1f3f9]',
-    surfaceHighest: isDarkMode ? 'bg-[#2d3449]' : 'bg-[#e2e8f0]',
-    textPrimary: isDarkMode ? 'text-[#dae2fd]' : 'text-[#1e293b]',
-    textSecondary: isDarkMode ? 'text-[#c7c4d7]' : 'text-[#64748b]',
-    accentPrimary: 'text-[#c0c1ff]',
+    surface: isDarkMode ? 'bg-[#0A0F1C]' : 'bg-[#f8f9fc]',
+    surfaceLow: isDarkMode ? 'bg-[#111A2C]' : 'bg-[#ffffff]',
+    surfaceContainer: isDarkMode ? 'bg-[#15213A]' : 'bg-[#f1f3f9]',
+    surfaceHighest: isDarkMode ? 'bg-[#1e2d4a]' : 'bg-[#e2e8f0]',
+    textPrimary: isDarkMode ? 'text-[#F8FAFC]' : 'text-[#1e293b]',
+    textSecondary: isDarkMode ? 'text-[#94a3b8]' : 'text-[#64748b]',
+    accentPrimary: 'text-[#8283ff]',
     accentSecondary: 'text-[#4edea3]',
   };
 

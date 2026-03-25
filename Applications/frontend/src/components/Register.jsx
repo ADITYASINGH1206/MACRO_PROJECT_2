@@ -36,7 +36,7 @@ export default function Register({ onRegister, onNavigateToLogin }) {
   };
 
   return (
-    <div className="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen flex flex-col items-center justify-center overflow-x-hidden relative">
+    <div className="bg-background text-on-surface font-sans selection:bg-primary/30 min-h-screen flex flex-col items-center justify-center overflow-x-hidden relative">
       {/* Hero Visual Background (Asymmetric Overlay) */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[120%] bg-surface-container-lowest rotate-6 rounded-[4rem] opacity-50"></div>
