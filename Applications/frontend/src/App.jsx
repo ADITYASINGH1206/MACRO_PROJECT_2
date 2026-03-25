@@ -148,6 +148,7 @@ export default function App() {
       return (
         <StudentRoster 
           students={students} 
+          attendanceLogs={attendanceLogs}
           isDarkMode={isDarkMode} 
           onBack={() => setCurrentView('dashboard')} 
         />

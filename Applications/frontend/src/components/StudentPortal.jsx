@@ -108,7 +108,7 @@ export default function StudentPortal({ user, onLogout, isDarkMode, toggleTheme 
             {currentTab === 'home' && <StudentHome user={user} studentData={studentData} isDarkMode={isDarkMode} />}
             {currentTab === 'history' && <StudentHistory history={studentData?.history || []} isDarkMode={isDarkMode} />}
             {currentTab === 'courses' && <StudentCourses courses={studentData?.courses || []} isDarkMode={isDarkMode} />}
-            {currentTab === 'calendar' && <CalendarView user={user} isDarkMode={isDarkMode} />}
+            {currentTab === 'calendar' && <CalendarView attendanceLogs={studentData?.history || []} isDarkMode={isDarkMode} />}
             {currentTab === 'profile' && <StudentProfile user={user} records={studentData?.profile?.academic_records?.[0]} isDarkMode={isDarkMode} />}
         </div>
       </main>

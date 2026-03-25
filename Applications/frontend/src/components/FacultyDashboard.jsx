@@ -275,7 +275,7 @@ export default function FacultyDashboard({
         )}
 
         {activeTab === 'calendar' && (
-          <CalendarView user={user} isDarkMode={isDarkMode} />
+          <CalendarView attendanceLogs={attendanceLogs} isDarkMode={isDarkMode} />
         )}
       </main>
 
