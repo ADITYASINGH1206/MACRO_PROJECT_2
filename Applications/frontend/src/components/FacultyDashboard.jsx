@@ -35,7 +35,9 @@ export default function FacultyDashboard({
           </div>
           <div className="hidden lg:block cursor-pointer" onClick={() => setActiveTab('overview')}>
             <h1 className="text-lg font-black tracking-[-0.04em] uppercase leading-none">Scholar <span className={styles.accentPrimary}>Slate Pro</span></h1>
-            <p className={`text-[10px] ${styles.textSecondary} font-bold tracking-[0.2em] mt-1.5 uppercase`}>Faculty Intelligence Hub</p>
+            <p className={`text-[10px] ${styles.textSecondary} font-bold tracking-[0.2em] mt-1.5 uppercase`}>
+              {user?.course_name ? `${user.course_name} Faculty` : 'Faculty Intelligence Hub'}
+            </p>
           </div>
         </div>
 

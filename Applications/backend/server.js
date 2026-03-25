@@ -7,6 +7,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import attendanceRoutes from './src/routes/attendanceRoutes.js';
 import facultyRoutes from './src/routes/facultyRoutes.js';
 import studentRoutes from './src/routes/studentRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/student', studentRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'healthy', message: 'Modular Backend API is running' });

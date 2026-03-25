@@ -11,7 +11,7 @@ export const login = async (req, res) => {
         // Query the Profiles table for matching credentials (normalize role to lowercase)
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, full_name, email, role')
+            .select('id, full_name, email, role, course_id, courses(name)')
             .eq('email', email)
             .eq('role', role.toLowerCase())
             .single();
@@ -26,7 +26,10 @@ export const login = async (req, res) => {
 
         return res.status(200).json({ 
             message: 'Login successful', 
-            user: data, 
+            user: {
+                ...data,
+                course_name: data.courses?.name
+            }, 
             token 
         });
     } catch (err) {

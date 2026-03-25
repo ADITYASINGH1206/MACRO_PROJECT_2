@@ -109,6 +109,13 @@ export default function Register({ onRegister, onNavigateToLogin }) {
               >
                 Faculty
               </button>
+              <button 
+                type="button"
+                className={`flex-1 py-2 text-[0.875rem] font-medium transition-colors rounded ${role === 'admin' ? 'bg-surface-container-highest text-on-surface' : 'text-on-surface-variant hover:text-on-surface'}`}
+                onClick={() => setRole('admin')}
+              >
+                Admin
+              </button>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-6">

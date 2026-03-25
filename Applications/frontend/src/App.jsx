@@ -28,9 +28,13 @@ export default function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    if (user && user.role === 'faculty') {
-      fetchStudents();
-      fetchAttendanceLogs();
+    if (user) {
+      if (user.role === 'faculty') {
+        fetchStudents();
+        fetchAttendanceLogs();
+      } else if (user.role === 'admin') {
+        // Administration context can be extended here
+      }
     }
   }, [user]);
 
@@ -123,7 +127,25 @@ export default function App() {
     return <Login onLogin={handleLogin} onNavigateToRegister={() => setAuthView('register')} isDarkMode={isDarkMode} />;
   }
 
-  if (user.role?.toLowerCase() === 'faculty') {
+  // Role Router
+  const role = user.role?.toLowerCase();
+
+  if (role === 'admin') {
+    if (currentView === 'roster') {
+        return <AdminPortal isDarkMode={isDarkMode} onBack={() => setCurrentView('dashboard')} />;
+    }
+    return (
+      <AdminDashboard 
+        user={user} 
+        onLogout={handleLogout} 
+        isDarkMode={isDarkMode} 
+        toggleTheme={toggleTheme}
+        onNavigateRegistry={() => setCurrentView('roster')}
+      />
+    );
+  }
+
+  if (role === 'faculty') {
     if (currentView === 'manual') {
       return (
         <ManualAttendance 
