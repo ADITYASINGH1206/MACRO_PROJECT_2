@@ -1,0 +1,10 @@
+opencv-python
+ultralytics
+face_recognition
+supabase
+numpy
+requests
+python-dotenv
+psycopg2-binary
+flask
+flask-cors
