@@ -1,82 +1,68 @@
-# 📘 YOLO‑based Face‑Recognition Attendance System
+# 🎓 Biometric Attendance System (High-Speed Neural Engine)
 
-This is a simple prototype that uses **YOLO‑v8** for person tracking and **face_recognition** for identifying students from a webcam feed.  
-When a known face appears,  the system logs the student’s name, tracking ID, and timestamp to an Excel file
+A high-performance classroom attendance system utilizing **YOLOv8** for person tracking and **Face_Recognition** for identification. This project integrates a React frontend, a Node.js backend gateway, and a FastAPI-based machine learning core.
 
-## 🔍 Features
+## 🏗️ Architecture
 
-- 🎥 Real‑time video capture from a webcam.
-- 🧠 Person detection and tracking using a YOLOv8 model.
-- 🙂 Face identification via pre‑loaded student images.
-- 🗂 Logs attendance to `attendance_log.xlsx` (one entry per student per day).
-- 📁 Automatically loads all images stored in `student_images/` (name = filename).
+- **`/frontend`**: React + Vite dashboard for Faculty and Students.
+- **`/backend`**: Node.js + Express API gateway (Supabase integration).
+- **`/ml-core`**: FastAPI + WebSockets vision server for real-time face identification.
+- **`best.pt`**: Trained YOLOv8 model for facial region extraction.
 
 ---
 
-## 🛠️ Requirements
+## 🚀 Quick Start
 
-- Python 3.8+
-- Packages (install with `pip`):
+### 1. Requirements
+- Node.js (v18+)
+- Python (3.8+)
+- Supabase Account
 
+### 2. Environment Setup
+Copy the `.env.example` to the appropriate directories and fill in your Supabase credentials.
+- `backend/.env`
+- `ml-core/.env`
+
+### 3. Installation
+
+**Backend:**
 ```bash
-pip install opencv-python pandas face_recognition ultralytics openpyxl
+cd backend
+npm install
 ```
 
-> **Note:** You’ll also need a working webcam and the YOLO model file (`yolov8n.pt` in this repo).  
-> A face‑specific model (`yolov8n-face.pt`) is attempted first; if it’s missing the code will fall back to the generic `yolov8n.pt`.
-
----
-
-## 📁 Project Structure
-
-```
-Prototype/
-├── main.ipynb               # primary Python notebook with YOLOAttendanceSystem class
-├── yolov8n.pt               # YOLOv8 model weights
-├── student_images/          # put student photos here (jpg/png)
-├── attendance_log.xlsx      # generated after running 
+**Frontend:**
+```bash
+cd frontend
+npm install
 ```
 
----
+**ML Core:**
+```bash
+# Create a virtual environment in the project root
+python -m venv .venv
+source .venv/Scripts/activate # Windows: .venv\Scripts\activate
+pip install -r ml-core/requirements.txt
+```
 
-## 🚀 Running the System
+### 4. Running the System
 
-1. **Populate** `student_images/` with one image per student.  
-   Name each file after the student (e.g. `Alice.jpg`).
+Start the components in separate terminals:
 
-2. **Launch** the notebook or convert the class into a script.  
-   To run directly:
-
-   ```bash
-   python main.py   # if you convert the notebook to a script
-   ```
-
-   Or open `main.ipynb` and execute the cells.
-
-3. The system opens a window showing the camera feed.  
-   - Detected/tracked persons receive a bounding box and ID.
-   - Recognized faces are labelled with the student’s name.
-   - Press **q** to quit.
-
-4. **Check** `attendance_log.xlsx` for today’s records.
+1. **Backend:** `cd backend && npm run dev`
+2. **Frontend:** `cd frontend && npm run dev`
+3. **ML Vision Server:** The backend will launch this automatically when tracking starts, or run manually: `cd ml-core && run_vision_server.bat`
 
 ---
 
-## 📝 Notes & Tips
+## 🛠️ Management
 
-- The log prevents duplicate entries for the same student on the same date.
-- If the YOLO‑face model isn’t available, the fallback detects generic “person” boxes.
-- The repository already ignores the virtual environment located in `black/` via `.gitignore`.
-
----
-
-## 📦 Extending the Prototype
-
-- 🔄 Add support for video files or IP cameras.
-- ⏱️ Timestamp format or CSV export options.
-- 🔒 Integrate with a database or web dashboard.
+- **Face Enrollment**: To add a new student, use the `Enroll Student` form on the Faculty Dashboard. This uploads a 128D embedding to the Supabase `face_data` table.
+- **Attendance Logic**: Students not identified during a session are automatically marked **Absent** at the end of the day to ensure full record integrity.
 
 ---
 
-Happy prototyping!  
-Feel free to tweak the notebook, swap models, or embed this class in a larger app.
+## 📝 Notes
+- Ensure your webcam is accessible.
+- The system defaults to high-precision matching (Tolerance: 0.6).
+- All timestamps are handled in UTC for consistent multi-region synchronization.

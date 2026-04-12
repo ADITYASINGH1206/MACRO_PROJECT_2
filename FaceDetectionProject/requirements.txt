@@ -1,8 +1,0 @@
-ultralytics
-opencv-python
-pandas
-matplotlib
-tqdm
-torch
-torchvision
-numpy

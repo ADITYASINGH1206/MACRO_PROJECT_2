@@ -8,9 +8,7 @@ black/
 # Environment variables
 .env
 .env.example
-package.json
 .env.example
-package.json
 
 # Datasets & archives
 archive/
@@ -24,11 +22,7 @@ WIDER_test/
 yolo_test/runs/
 
 
-# Images & media
-*.jpg
-*.jpeg
-*.png
-*.zip
+
 
 # Generated files
 *.xlsx
@@ -46,19 +40,15 @@ FaceDetectionProject/training_plots.png
 
 # APIs
 /After-arch/docs
-*.bat
-*.sh
 *Dockerfile
 *.conf
 
 # Node modules
 node_modules/
 **/node_modules/
-*package-lock.json
 
 # Workflows
 .agent/
 .agents/
 _agents/
-agent/
 

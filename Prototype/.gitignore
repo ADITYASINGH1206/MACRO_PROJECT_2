@@ -1,3 +1,0 @@
-# ignore the virtual environment in the black folder
-black/
-.env 
