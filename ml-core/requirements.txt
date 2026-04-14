@@ -1,0 +1,9 @@
+opencv-python
+numpy
+requests
+face_recognition
+fastapi
+uvicorn
+ultralytics
+supabase
+python-dotenv
