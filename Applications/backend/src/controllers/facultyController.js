@@ -1,6 +1,7 @@
 import { supabase } from '../config/supabaseClient.js';
 import { spawn } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 
 let mlProcess = null;
 
@@ -44,10 +45,10 @@ export const stopLiveAttendance = async (req, res) => {
 
 export const addStudent = async (req, res) => {
     try {
-        const { name, email, course_id } = req.body;
+        const { name, email, course_id, imageBase64 } = req.body;
 
-        if (!name || !email) {
-            return res.status(400).json({ error: 'Name and email are required to register a student.' });
+        if (!name || !email || !imageBase64) {
+            return res.status(400).json({ error: 'Name, email, and biometric image are required.' });
         }
 
         // 1. Create User in `profiles` table
@@ -58,11 +59,31 @@ export const addStudent = async (req, res) => {
             .select()
             .single();
 
-
         if (userError) throw userError;
 
+        // 2. Decode and save Base64 image to temporary drive
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        const tempPath = path.join(process.cwd(), 'temp', `enroll_${userData.id}.jpg`);
+        fs.writeFileSync(tempPath, buffer);
+
+        // 3. Spawns Python indexing engine on the newly created image for 128D extraction
+        const rootDir = path.resolve(process.cwd(), '..', '..');
+        const pythonExe = path.join(rootDir, '.venv', 'Scripts', 'python.exe');
+        const scriptPath = path.join(rootDir, 'Applications', 'ml-core', 'enroll_face.py');
+
+        const enrollProcess = spawn(pythonExe, [scriptPath, userData.id, tempPath]);
+
+        enrollProcess.on('close', (code) => {
+            console.log(`[SYSTEM] ML-Enrollment process exited with code ${code} for ${name}`);
+            try {
+                // Wipe biometric snapshot from local disk after extraction (GDPR/Compliance)
+                if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+            } catch(e) { console.error('Failed to clear temp file', e); }
+        });
+
         return res.status(201).json({ 
-            message: 'Student added successfully!', 
+            message: 'Student added && Biometrics queued successfully!', 
             student: userData 
         });
     } catch (err) {
