@@ -30,7 +30,7 @@ export default function CalendarView({ attendanceLogs = [], isDarkMode }) {
     const days = [];
     // Padding for first week
     for (let i = 0; i < daysInMonth.firstDay; i++) {
-      days.push({ day: null });
+      days.push({ day: null, health: 'none', logs: [] });
     }
     for (let i = 1; i <= daysInMonth.totalDays; i++) {
       const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), i).toDateString();

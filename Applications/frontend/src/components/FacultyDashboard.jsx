@@ -10,6 +10,26 @@ export default function FacultyDashboard({
 }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLiveRunning, setIsLiveRunning] = useState(false);
+  const [isBooting, setIsBooting] = useState(false);
+
+  const toggleLiveTracking = async () => {
+    try {
+      setIsBooting(true);
+      if (isLiveRunning) {
+        await fetch('http://localhost:3000/api/faculty/stop-live-tracking', { method: 'POST' });
+        setIsLiveRunning(false);
+      } else {
+        await fetch('http://localhost:3000/api/faculty/start-live-tracking', { method: 'POST' });
+        setIsLiveRunning(true);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to contact the backend ML agent gateway.");
+    } finally {
+      setIsBooting(false);
+    }
+  };
 
   // Premium Deep Blue Palette (Phase 8)
   const styles = {
@@ -36,7 +56,7 @@ export default function FacultyDashboard({
           <div className="hidden lg:block cursor-pointer" onClick={() => setActiveTab('overview')}>
             <h1 className="text-lg font-black tracking-[-0.04em] uppercase leading-none">Scholar <span className={styles.accentPrimary}>Slate Pro</span></h1>
             <p className={`text-[10px] ${styles.textSecondary} font-bold tracking-[0.2em] mt-1.5 uppercase`}>
-              {user?.course_name ? `${user.course_name} Faculty` : 'Faculty Intelligence Hub'}
+              {user?.course_name ? `${user.course_name} Attendance System` : 'Attendance System'}
             </p>
           </div>
         </div>
@@ -130,8 +150,15 @@ export default function FacultyDashboard({
                 
                 <div className="mt-12 space-y-4">
                   <button 
+                    onClick={toggleLiveTracking}
+                    disabled={isBooting}
+                    className={`w-full py-5 ${isLiveRunning ? 'bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/50' : 'bg-gradient-to-r from-[#8083ff] to-[#c0c1ff] text-white shadow-xl shadow-[#8083ff]/30'} font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50`}
+                  >
+                    {isBooting ? 'Booting Engine...' : (isLiveRunning ? 'Terminate Feed' : 'Start Live Feed')}
+                  </button>
+                  <button 
                     onClick={() => setIsModalOpen(true)}
-                    className="w-full py-5 bg-gradient-to-r from-[#8083ff] to-[#c0c1ff] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-[#8083ff]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="w-full py-5 bg-white/5 border border-white/5 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-white/10 transition-all"
                   >
                     Quick Enroll
                   </button>
@@ -139,7 +166,7 @@ export default function FacultyDashboard({
                     onClick={onNavigateManual}
                     className={`w-full py-5 ${styles.surfaceHighest} border border-white/5 font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-white/10 transition-all`}
                   >
-                    Mark Attendance
+                    Manual Override
                   </button>
                 </div>
               </div>

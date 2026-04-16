@@ -1,4 +1,46 @@
 import { supabase } from '../config/supabaseClient.js';
+import { spawn } from 'child_process';
+import path from 'path';
+
+let mlProcess = null;
+
+export const startLiveAttendance = async (req, res) => {
+    if (mlProcess) {
+        return res.status(400).json({ error: 'Live tracking is already running.' });
+    }
+    
+    const rootDir = path.resolve(process.cwd(), '..', '..');
+    const batPath = path.join(rootDir, 'Applications', 'ml-core', 'run_ml_core.bat');
+    
+    try {
+        mlProcess = spawn('cmd.exe', ['/c', batPath], { cwd: path.join(rootDir, 'Applications', 'ml-core'), detached: false });
+        
+        mlProcess.on('close', (code) => {
+            console.log(`[SYSTEM] ML-Core process exited with code ${code}`);
+            mlProcess = null;
+        });
+        
+        return res.status(200).json({ message: 'Live attendance tracking started successfully.' });
+    } catch (e) {
+        mlProcess = null;
+        return res.status(500).json({ error: 'Failed to launch ML pipeline: ' + e.message });
+    }
+};
+
+export const stopLiveAttendance = async (req, res) => {
+    if (!mlProcess) {
+        return res.status(400).json({ error: 'Live tracking is not running.' });
+    }
+    
+    try {
+        // Using taskkill to kill process tree cleanly on Windows
+        spawn('taskkill', ['/pid', mlProcess.pid, '/f', '/t']);
+        mlProcess = null;
+        return res.status(200).json({ message: 'Live attendance tracking stopped.' });
+    } catch (e) {
+        return res.status(500).json({ error: 'Failed to stop ML pipeline: ' + e.message });
+    }
+};
 
 export const addStudent = async (req, res) => {
     try {

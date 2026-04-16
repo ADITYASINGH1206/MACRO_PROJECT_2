@@ -140,13 +140,30 @@ def main():
     video_stream = VideoCaptureThread(src=CAMERA_ID).start()
     time.sleep(1.0) # Warm up camera sensor
 
+    frame_count = 0
+    last_boxes = []
+
     try:
         while True:
             if video_stream.stopped:
                 break
             
             frame = video_stream.read()
+            frame_count += 1
+            
+            # Fluid 30+ FPS rendering decoupled from deep learning pipeline
+            if frame_count % 3 != 0:
+                for (x1, y1, x2, y2, label, color) in last_boxes:
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                    cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
+                
+                cv2.imshow("Multi-Camera Surveillance Feed", frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                continue
+                
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            current_boxes = []
 
             # 1. Advanced Deep Learning Object Detection using Custom YOLOv8
             results = yolo_model(frame, verbose=False)
@@ -162,8 +179,13 @@ def main():
                         face_crop = rgb_frame[y1:y2, x1:x2]
                         if face_crop.size == 0: continue
                         
+                        # Fix memory contiguity binding error for dlib
+                        face_crop = np.ascontiguousarray(face_crop)
+                        
                         # 2. Extract Sub-Features for Spatial Matching
                         h, w, _ = face_crop.shape
+                        if h <= 0 or w <= 0: continue
+                        
                         encodings = face_recognition.face_encodings(face_crop, [(0, w, h, 0)])
                         
                         if encodings:
@@ -181,13 +203,15 @@ def main():
                                 
                                 # 4. Propagate successful hits to application boundary
                                 if s_id not in processed_students:
-                                    send_attendance_payload(s_id)
+                                    threading.Thread(target=send_attendance_payload, args=(s_id,), daemon=True).start()
                                     processed_students.add(s_id)
                             
+                            current_boxes.append((x1, y1, x2, y2, label, color))
                             # Real-time GPU overlay updates
                             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                             cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 0.7, color, 1)
 
+            last_boxes = current_boxes
             cv2.imshow("Multi-Camera Surveillance Feed", frame)
             
             # Press 'q' to break loop cleanly
