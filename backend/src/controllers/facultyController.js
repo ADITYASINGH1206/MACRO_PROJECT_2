@@ -279,6 +279,34 @@ export const markManualAttendance = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error marking attendance' });
     }
 };
+
+export const markBulkAttendance = async (req, res) => {
+    try {
+        const { attendanceRecords } = req.body; // Expect array of { student_id, status, course_id, timestamp }
+
+        if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
+            return res.status(400).json({ error: 'Valid attendance records are required.' });
+        }
+
+        const formattedRecords = attendanceRecords.map(r => ({
+            user_id: r.student_id,
+            course_id: r.course_id,
+            status: r.status,
+            timestamp: r.timestamp || new Date().toISOString()
+        }));
+
+        const { data, error } = await supabase
+            .from('attendance')
+            .insert(formattedRecords)
+            .select();
+
+        if (error) throw error;
+        return res.status(201).json({ message: `Successfully marked ${data.length} records manually.`, data });
+    } catch (err) {
+        console.error('[FACULTY ERROR] Error marking bulk attendance:', err);
+        return res.status(500).json({ error: 'Internal Server Error marking bulk attendance' });
+    }
+};
 export const getFacultyCourses = async (req, res) => {
     try {
         const { id } = req.params;

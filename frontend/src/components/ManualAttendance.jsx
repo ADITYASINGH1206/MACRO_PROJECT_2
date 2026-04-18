@@ -1,18 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function ManualAttendance({ students, onMarkAttendance, isDarkMode, onBack }) {
+export default function ManualAttendance({ students, courses, onMarkBulkAttendance, isDarkMode, onBack }) {
   const [search, setSearch] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [stagedUpdates, setStagedUpdates] = useState({}); // { studentId: status }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Default to first course if available
+  useEffect(() => {
+    if (!selectedCourseId && courses && courses.length > 0) {
+      setSelectedCourseId(courses[0].id);
+    }
+  }, [courses, selectedCourseId]);
 
   const styles = {
-    surface: isDarkMode ? 'bg-[#0b1326]' : 'bg-[#f8f9fc]',
-    surfaceLow: isDarkMode ? 'bg-[#131b2e]' : 'bg-[#ffffff]',
-    surfaceContainer: isDarkMode ? 'bg-[#171f33]' : 'bg-[#f1f3f9]',
-    surfaceHighest: isDarkMode ? 'bg-[#2d3449]' : 'bg-[#e2e8f0]',
-    textPrimary: isDarkMode ? 'text-[#dae2fd]' : 'text-[#1e293b]',
-    textSecondary: isDarkMode ? 'text-[#c7c4d7]' : 'text-[#64748b]',
-    accentPrimary: 'text-[#c0c1ff]',
+    surface: isDarkMode ? 'bg-[#0A0F1C]' : 'bg-[#f8f9fc]',
+    surfaceLow: isDarkMode ? 'bg-[#111A2C]' : 'bg-[#ffffff]',
+    surfaceContainer: isDarkMode ? 'bg-[#15213A]' : 'bg-[#f1f3f9]',
+    surfaceHighest: isDarkMode ? 'bg-[#1e2d4a]' : 'bg-[#e2e8f0]',
+    textPrimary: isDarkMode ? 'text-[#F8FAFC]' : 'text-[#1e293b]',
+    textSecondary: isDarkMode ? 'text-[#94a3b8]' : 'text-[#64748b]',
+    accentPrimary: 'text-[#8283ff]',
     accentSecondary: 'text-[#4edea3]',
     accentTertiary: 'text-[#ffb783]',
+    border: 'border-white/10',
   };
 
   const filteredStudents = students.filter(s => 
@@ -20,111 +31,194 @@ export default function ManualAttendance({ students, onMarkAttendance, isDarkMod
     (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleMarkAllPresent = () => {
-    filteredStudents.forEach(s => onMarkAttendance(s.id, 'present'));
+  const handleStageStatus = (studentId, status) => {
+    setStagedUpdates(prev => ({
+      ...prev,
+      [studentId]: prev[studentId] === status ? null : status
+    }));
   };
 
+  const handleMarkAllPresent = () => {
+    const bulk = {};
+    filteredStudents.forEach(s => {
+      bulk[s.id] = 'present';
+    });
+    setStagedUpdates(prev => ({ ...prev, ...bulk }));
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedCourseId) {
+      alert("Please select a course first.");
+      return;
+    }
+
+    const records = Object.entries(stagedUpdates)
+      .filter(([_, status]) => status !== null)
+      .map(([studentId, status]) => ({
+        student_id: studentId,
+        status: status,
+        course_id: selectedCourseId,
+        timestamp: new Date().toISOString()
+      }));
+
+    if (records.length === 0) {
+      alert("No attendance records to submit.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onMarkBulkAttendance(records);
+      setStagedUpdates({});
+      alert(`Successfully submitted ${records.length} attendance records.`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit attendance.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const stagedCount = Object.values(stagedUpdates).filter(v => v !== null).length;
+
   return (
-    <div className={`min-h-screen ${styles.surface} ${styles.textPrimary} p-8 lg:p-12 animate-in fade-in duration-700`}>
-      <div className="max-w-[1400px] mx-auto space-y-12">
-        <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-12 border-b border-white/5 pb-12">
+    <div className={`min-h-screen ${styles.surface} ${styles.textPrimary} font-sans selection:bg-[#8283ff]/30 pb-32`}>
+      {/* Navigation Header */}
+      <header className={`fixed top-0 w-full z-50 backdrop-blur-xl border-b ${styles.border} flex items-center justify-between px-8 py-5`} style={{backgroundColor: isDarkMode ? 'rgba(10,15,28,0.9)' : 'rgba(248,249,252,0.9)'}}>
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={onBack}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border ${styles.border} transition-all`}
+          >
+            <span className="material-symbols-outlined text-lg">arrow_back</span>
+          </button>
           <div>
-            <button 
-              onClick={onBack} 
-              className={`text-[10px] font-black uppercase tracking-[0.4em] ${styles.accentPrimary} mb-6 flex items-center gap-3 hover:translate-x-[-8px] transition-all group`}
-            >
-              <span className="material-symbols-outlined text-sm group-hover:scale-125 transition-transform">arrow_back</span>
-              Back
-            </button>
-            <h2 className="text-7xl font-black tracking-tighter leading-[0.85] font-headline">Manual<br/><span className="opacity-40">Attendance</span></h2>
-            <p className={`${styles.textSecondary} text-lg font-light mt-6 max-w-xl`}>Manually mark student attendance. Changes are synchronized in real-time to the database.</p>
+             <h1 className="text-lg font-black tracking-[-0.04em] uppercase leading-none">Manual <span className={styles.accentPrimary}>Attendance</span></h1>
+             <p className={`text-[10px] ${styles.textSecondary} font-bold tracking-[0.2em] mt-1.5 uppercase`}>Bulk Registry Entry</p>
           </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-6 w-full xl:w-auto">
-            <div className="relative group flex-grow sm:w-96">
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
+             <div className="text-right">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Active Course</p>
+                <select 
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  className={`bg-transparent text-xs font-bold outline-none cursor-pointer ${styles.accentPrimary}`}
+                >
+                   <option value="" disabled className="bg-[#0A0F1C]">Select Course</option>
+                  {(courses || []).map(c => <option key={c.id} value={c.id} className="bg-[#0A0F1C]">{c.name}</option>)}
+                </select>
+             </div>
+             <div className={`w-px h-8 bg-white/10 mx-2`}></div>
+          </div>
+          <button 
+            onClick={handleSubmit}
+            disabled={stagedCount === 0 || isSubmitting}
+            className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-3 ${stagedCount > 0 ? 'bg-[#8283ff] text-white shadow-lg shadow-[#8283ff]/30' : 'bg-white/5 text-white/20 border ' + styles.border}`}
+          >
+            {isSubmitting ? 'Processing...' : `Submit (${stagedCount})`}
+          </button>
+        </div>
+      </header>
+
+      <main className="pt-32 px-8 max-w-[1400px] mx-auto space-y-12">
+        {/* Controls Bar */}
+        <section className="flex flex-col md:flex-row items-center justify-between gap-8">
+           <div className="relative group w-full md:w-96">
               <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity">search</span>
               <input 
                 type="text" 
-                placeholder="Search Students..."
+                placeholder="Search by name or email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className={`w-full ${styles.surfaceLow} border border-white/5 rounded-2xl py-6 pl-16 pr-8 text-sm font-bold placeholder:opacity-20 outline-none focus:border-[#c0c1ff]/40 shadow-2xl transition-all`}
+                className={`w-full ${styles.surfaceLow} border ${styles.border} rounded-2xl py-5 pl-16 pr-8 text-sm font-bold placeholder:opacity-20 outline-none focus:border-[#8283ff]/40 shadow-xl transition-all`}
               />
-            </div>
-            <div className="flex gap-4 w-full sm:w-auto">
-               <button 
-                  onClick={handleMarkAllPresent}
-                  className={`px-8 py-5 ${styles.surfaceHighest} border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#4edea3] hover:text-[#0b1326] transition-all whitespace-nowrap`}
-               >
-                 Mark All Present
-               </button>
-               <button className={`p-5 ${styles.surfaceLow} border border-white/10 rounded-2xl text-[#c0c1ff] hover:bg-white/5 transition-all shadow-xl`}>
-                 <span className="material-symbols-outlined">sync</span>
-               </button>
-            </div>
-          </div>
-        </header>
+           </div>
+           <div className="flex items-center gap-4 w-full md:w-auto">
+              <button 
+                onClick={handleMarkAllPresent}
+                className={`flex-1 md:flex-none px-8 py-5 rounded-2xl border ${styles.border} bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#4edea3]/10 hover:text-[#4edea3] transition-all`}
+              >
+                Mark All Present
+              </button>
+              <button 
+                onClick={() => setStagedUpdates({})}
+                className={`px-8 py-5 rounded-2xl border ${styles.border} bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-500/10 hover:text-red-400 transition-all`}
+              >
+                Reset
+              </button>
+           </div>
+        </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-          {filteredStudents.map(student => (
-            <div key={student.id} className={`${styles.surfaceLow} p-8 rounded-[2.5rem] border border-white/5 hover:border-[#c0c1ff]/30 transition-all group shadow-2xl relative overflow-hidden flex flex-col justify-between`}>
-              {/* Card Decoration */}
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br from-[#c0c1ff]/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-              
-              <div className="space-y-8 relative z-10">
-                <div className="flex items-start justify-between">
-                  <div className={`w-20 h-20 rounded-[1.5rem] ${styles.surfaceContainer} flex items-center justify-center font-black text-3xl text-[#c0c1ff] border border-white/5 shadow-inner`}>
-                    {student.full_name[0]}
-                  </div>
-                  <div className="text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 opacity-40">
-                    ID: {student.id.slice(0, 8)}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-black text-2xl tracking-tighter leading-tight mb-2 group-hover:text-[#c0c1ff] transition-colors">{student.full_name}</h4>
-                  <p className={`text-[10px] ${styles.textSecondary} font-bold uppercase tracking-[0.2em] opacity-60`}>{student.email}</p>
-                </div>
-
-                <div className="h-px bg-white/5"></div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <button 
-                    onClick={() => onMarkAttendance(student.id, 'present')}
-                    className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-[#4edea3]/5 border border-[#4edea3]/10 hover:bg-[#4edea3] hover:text-[#0b1326] transition-all group/btn"
-                  >
-                    <span className="material-symbols-outlined text-lg">check_circle</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest">Present</span>
-                  </button>
-                  <button 
-                    onClick={() => onMarkAttendance(student.id, 'absent')}
-                    className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-red-500/5 border border-red-500/10 hover:bg-red-500 hover:text-white transition-all group/btn"
-                  >
-                    <span className="material-symbols-outlined text-lg">cancel</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest">Absent</span>
-                  </button>
-                  <button 
-                    onClick={() => onMarkAttendance(student.id, 'late')}
-                    className="flex flex-col items-center gap-2 py-4 rounded-2xl bg-[#ffb783]/5 border border-[#ffb783]/10 hover:bg-[#ffb783] hover:text-[#0b1326] transition-all group/btn"
-                  >
-                    <span className="material-symbols-outlined text-lg">schedule</span>
-                    <span className="text-[8px] font-black uppercase tracking-widest">Late</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          {filteredStudents.length === 0 && (
-            <div className="col-span-full py-48 text-center flex flex-col items-center gap-8">
-               <div className={`w-24 h-24 rounded-full ${styles.surfaceContainer} flex items-center justify-center opacity-20`}>
-                  <span className="material-symbols-outlined text-5xl">person_search</span>
-               </div>
-               <p className="text-xs font-black uppercase tracking-[0.5em] opacity-20 italic">No students found matching your search.</p>
-            </div>
-          )}
+        {/* Student List View */}
+        <div className={`${styles.surfaceLow} rounded-[2.5rem] border ${styles.border} shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700`}>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className={`${styles.surfaceContainer} border-b ${styles.border}`}>
+                <th className="px-10 py-8 text-[11px] font-black uppercase tracking-[0.3em] opacity-40">Student Detail</th>
+                <th className="px-10 py-8 text-[11px] font-black uppercase tracking-[0.3em] opacity-40 text-center">Status Selection</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {(filteredStudents || []).map(student => (
+                <tr key={student.id} className="hover:bg-white/[0.02] transition-colors group">
+                  <td className="px-10 py-8">
+                    <div className="flex items-center gap-6">
+                      <div className={`w-14 h-14 rounded-2xl ${styles.surfaceContainer} flex items-center justify-center font-black text-xl text-[#8283ff] border ${styles.border} shadow-inner group-hover:scale-110 transition-all`}>
+                        {student.full_name?.[0] || 'S'}
+                      </div>
+                      <div>
+                        <h4 className="font-black text-lg tracking-tight leading-none mb-1.5 group-hover:text-[#8283ff] transition-colors">{student.full_name}</h4>
+                        <p className={`text-[10px] ${styles.textSecondary} font-bold uppercase tracking-[0.2em] opacity-40`}>{student.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-10 py-8">
+                    <div className="flex items-center justify-center gap-3">
+                       {[
+                         { id: 'present', icon: 'check_circle', label: 'Present', color: 'bg-[#4edea3]', effect: 'shadow-[#4edea3]/20' },
+                         { id: 'absent', icon: 'cancel', label: 'Absent', color: 'bg-red-500', effect: 'shadow-red-500/20' },
+                         { id: 'late', icon: 'schedule', label: 'Late', color: 'bg-[#ffb783]', effect: 'shadow-[#ffb783]/20' }
+                       ].map(btn => (
+                         <button
+                           key={btn.id}
+                           onClick={() => handleStageStatus(student.id, btn.id)}
+                           className={`flex flex-col items-center justify-center w-24 py-3 rounded-2xl border ${styles.border} transition-all relative overflow-hidden group/btn ${stagedUpdates[student.id] === btn.id ? btn.color + ' text-white shadow-xl ' + btn.effect : 'bg-white/5 hover:bg-white/10 text-white/30'}`}
+                         >
+                            <span className={`material-symbols-outlined text-xl mb-1 ${stagedUpdates[student.id] === btn.id ? 'animate-bounce' : ''}`}>{btn.icon}</span>
+                            <span className="text-[8px] font-black uppercase tracking-widest">{btn.label}</span>
+                         </button>
+                       ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredStudents.length === 0 && (
+                <tr>
+                  <td colSpan="2" className="px-10 py-32 text-center">
+                    <div className="opacity-10 italic font-black uppercase tracking-[0.4em]">No student records found</div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </main>
+
+      {/* Manual Submission Floating Bar (Mobile / Compact) */}
+      {stagedCount > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] w-[90%] animate-in slide-in-from-bottom-12 duration-500">
+           <button 
+             onClick={handleSubmit}
+             disabled={isSubmitting}
+             className="w-full bg-[#8283ff] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.4em] shadow-[0_20px_48px_rgba(130,131,255,0.4)] active:scale-[0.98] transition-all"
+           >
+             {isSubmitting ? 'Submitting...' : `Submit Attendance for ${stagedCount} Students`}
+           </button>
+        </div>
+      )}
     </div>
   );
 }

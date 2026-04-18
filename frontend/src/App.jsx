@@ -118,6 +118,21 @@ export default function App() {
     }
   };
 
+  const markBulkAttendance = async (records) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/faculty/mark-bulk-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendanceRecords: records }),
+      });
+      if (response.ok) {
+        fetchAttendanceLogs();
+      }
+    } catch (err) {
+      console.error('Error marking bulk attendance:', err);
+    }
+  };
+
   const handleExportCSV = () => {
     if (attendanceLogs.length === 0) return;
     const headers = ["Student Name", "Email", "Status", "Date"];
@@ -194,7 +209,8 @@ export default function App() {
       return (
         <ManualAttendance 
           students={students} 
-          onMarkAttendance={markAttendance} 
+          courses={courses}
+          onMarkBulkAttendance={markBulkAttendance} 
           isDarkMode={isDarkMode} 
           onBack={() => setCurrentView('dashboard')} 
         />
