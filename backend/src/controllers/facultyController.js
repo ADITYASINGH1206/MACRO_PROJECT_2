@@ -65,18 +65,18 @@ export const stopLiveAttendance = async (req, res) => {
             if (enrolledStudents && enrolledStudents.length > 0) {
                 const studentIds = enrolledStudents.map(e => e.student_id);
                 
-                // Use session start time if available, otherwise fallback to 12h window
-                const sessionStart = trackingSessions.get(course_id);
-                const queryStartTime = sessionStart || new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+                // Calculate Start of Day (UTC) to ensure we don't mark absent if they were seen earlier today
+                const now = new Date();
+                const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
                 
-                console.log(`[SESSION] Checking activity since: ${queryStartTime}`);
+                console.log(`[SESSION] Checking activity since start of day: ${dayStart}`);
 
-                // Find who ALREADY has ANY attendance record for this course since session start
+                // Find who ALREADY has ANY attendance record for this course today (Present, Absent, or Late)
                 const { data: existingLogs } = await supabase
                     .from('attendance')
                     .select('user_id')
                     .eq('course_id', course_id)
-                    .gte('timestamp', queryStartTime);
+                    .gte('timestamp', dayStart);
 
                 const accountedIds = new Set(existingLogs?.map(l => l.user_id) || []);
                 const absentToMark = studentIds.filter(id => !accountedIds.has(id));
@@ -86,7 +86,7 @@ export const stopLiveAttendance = async (req, res) => {
                         user_id: sid,
                         course_id,
                         status: 'absent',
-                        timestamp: new Date().toISOString()
+                        timestamp: now.toISOString()
                     }));
 
                     const { error: insertError } = await supabase.from('attendance').insert(absentRecords);
@@ -96,8 +96,10 @@ export const stopLiveAttendance = async (req, res) => {
                         console.log(`[SESSION] Successfully marked ${absentToMark.length} students as ABSENT.`);
                     }
                 } else {
-                    console.log('[SESSION] All enrolled students already have attendance records for this session.');
+                    console.log('[SESSION] All enrolled students already have attendance records for today.');
                 }
+            } else {
+                console.log(`[SESSION] No enrolled students found for course ${course_id}. No absentees to mark.`);
             }
             // Cleanup session metadata
             trackingSessions.delete(course_id);
