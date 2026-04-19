@@ -9,7 +9,46 @@ export const logAttendance = async (req, res) => {
         }
 
         const logTime = timestamp || new Date().toISOString();
+        const now = new Date();
+        const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
 
+        // 1. Check for existing record for this student/course today
+        const { data: existingLog, error: fetchError } = await supabase
+            .from('attendance')
+            .select('id, status')
+            .eq('user_id', student_id)
+            .eq('course_id', course_id)
+            .gte('timestamp', dayStart)
+            .order('timestamp', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        if (existingLog) {
+            // Case A: Already present or late - skip
+            if (existingLog.status === 'present' || existingLog.status === 'late') {
+                return res.status(200).json({ 
+                    message: 'Attendance already recorded for today', 
+                    data: existingLog 
+                });
+            }
+
+            // Case B: Currently marked as absent - upgrade to present
+            if (existingLog.status === 'absent' && (status === 'present' || !status)) {
+                const { data: updated, error: updateError } = await supabase
+                    .from('attendance')
+                    .update({ status: 'present', timestamp: logTime })
+                    .eq('id', existingLog.id)
+                    .select();
+                
+                if (updateError) throw updateError;
+                console.log(`[UPGRADE] Status changed from ABSENT to PRESENT for student ${student_id}`);
+                return res.status(200).json({ message: 'Attendance upgraded from absent to present', data: updated });
+            }
+        }
+
+        // Case C: New record
         const { data, error } = await supabase
             .from('attendance')
             .insert([{
