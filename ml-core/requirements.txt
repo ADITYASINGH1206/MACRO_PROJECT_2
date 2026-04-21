@@ -3,7 +3,8 @@ numpy
 requests
 face_recognition
 fastapi
+websockets
 uvicorn
-ultralytics
+ultralytics>=8.4.41
 supabase
 python-dotenv
