@@ -1,0 +1,34 @@
+# =============================================================================
+# ByteTrack Configuration – Tuned for Face Tracking on Edge Hardware
+# =============================================================================
+# Lowered thresholds compared to defaults (0.5 / 0.1) to retain slightly
+# blurry or partially-occluded faces that are common in classroom cameras.
+# Faces that fall between low and high are still tracked as "secondary"
+# candidates by ByteTrack's two-stage association, preventing ID switches
+# when a face briefly becomes less confident.
+# =============================================================================
+
+tracker_type: bytetrack
+
+# --- Detection Thresholds ---
+# Detections above this become "high-confidence" tracks immediately.
+track_high_thresh: 0.35
+
+# Detections between low and high are "secondary" – kept alive via IoU matching
+# with existing tracks, preventing premature track loss on blurry frames.
+track_low_thresh: 0.10
+
+# A brand-new track must exceed this confidence to be initialized.
+# Slightly above low_thresh to avoid spawning ghosts on noisy frames.
+new_track_thresh: 0.40
+
+# --- Association ---
+# IoU threshold for matching detections ↔ existing tracks.
+# Lower = stricter spatial overlap required.
+match_thresh: 0.80
+
+# --- Track Lifecycle ---
+# Maximum frames a track survives without a matching detection.
+# 60 frames ≈ 2 seconds at 30 FPS, generous enough for brief occlusions
+# (e.g., a student looking down at their desk).
+track_buffer: 60
