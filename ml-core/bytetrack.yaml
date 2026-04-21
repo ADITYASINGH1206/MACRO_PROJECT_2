@@ -32,3 +32,4 @@ match_thresh: 0.80
 # 60 frames ≈ 2 seconds at 30 FPS, generous enough for brief occlusions
 # (e.g., a student looking down at their desk).
 track_buffer: 60
+fuse_score: True
