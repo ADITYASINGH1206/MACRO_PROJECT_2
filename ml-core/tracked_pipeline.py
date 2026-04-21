@@ -1,29 +1,7 @@
 """
-tracked_pipeline.py – YOLOv8 ByteTrack Face-Tracking Pipeline
-=============================================================
-Replaces the previous stateless `yolo_model(frame)` predict-mode calls with
-`yolo_model.track(...)` + ByteTrack, giving each face a persistent integer
-track_id across frames.
-
-Key design decisions:
-  1. `persist=True`  → YOLO's internal tracker state survives between calls,
-     keeping IDs stable across the entire video session.
-  2. `bytetrack.yaml` → custom thresholds tuned for slightly-blurry classroom
-     faces (lower high/low thresh) and generous track_buffer (60 frames).
-  3. Recognition cache (`track_id → student`) → the heavy face_recognition
-     model only runs when a track_id has NOT yet been identified. Once matched,
-     the tracker carries the identity for free.
-  4. Frame-buffer consensus → a track must survive ≥ CONFIRM_FRAMES (default 5)
-     consecutive frames before being marked "present" in the DB, eliminating
-     false-positive flash detections.
-
-Usage (standalone):
-    python tracked_pipeline.py
-
-Usage (import into vision_server.py):
-    from tracked_pipeline import TrackedAttendancePipeline
-    pipeline = TrackedAttendancePipeline(yolo_model, enrolled_students, course_id)
-    metadata = pipeline.process_frame(frame)
+tracked_pipeline.py – High Performance YOLOv8 ByteTrack + Threaded Video + Cosine Similarity
+===========================================================================================
+Implements the high-performance Face Attendance pipeline solving camera latency and ID switching.
 """
 
 import cv2
@@ -31,6 +9,8 @@ import numpy as np
 import os
 import time
 import requests
+import queue
+import threading
 import face_recognition
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -41,15 +21,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-#  Constants
+#  Configuration Constants
 # ---------------------------------------------------------------------------
 ML_CORE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 BYTETRACK_CFG    = os.path.join(ML_CORE_DIR, "bytetrack.yaml")
-CONFIRM_FRAMES   = 5        # Minimum consecutive frames before marking present
-RECOG_INTERVAL   = 3        # Only run recognition every N frames (perf tuning)
-RECOG_TOLERANCE  = 0.55     # face_recognition Euclidean distance threshold
+REQUIRED_HITS    = 3        # Cosine similarity success required before marking Present
+SKIP_FRAMES      = 10       # Skip recognition for 10 frames after an attempt
+COSINE_THRESHOLD = 0.45     # Custom Cosine Similarity Acceptance Threshold
+CROP_MARGIN      = 0.15     # 15% margin for face bounding box cropping
 
 SUPABASE_URL     = os.getenv("SUPABASE_URL")
 SUPABASE_KEY     = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
@@ -65,9 +46,8 @@ else:
     except (ValueError, TypeError):
         CAMERA_ID = 0
 
-
 # ---------------------------------------------------------------------------
-#  Supabase helpers (unchanged from original)
+#  Supabase & DB Helpers
 # ---------------------------------------------------------------------------
 supabase: Client = (
     create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -75,28 +55,17 @@ supabase: Client = (
     else None
 )
 
-
 def get_enrolled_students(course_id: str) -> list[dict]:
-    """Fetch face embeddings for all students enrolled in *course_id*."""
+    """Fetch face embeddings for all students enrolled."""
     if not supabase:
         return []
     try:
-        enroll_res = (
-            supabase.table("enrollments")
-            .select("student_id")
-            .eq("course_id", course_id)
-            .execute()
-        )
+        enroll_res = supabase.table("enrollments").select("student_id").eq("course_id", course_id).execute()
         student_ids = [e["student_id"] for e in enroll_res.data]
         if not student_ids:
             return []
 
-        response = (
-            supabase.table("face_data")
-            .select("user_id, embedding, profiles(full_name)")
-            .in_("user_id", student_ids)
-            .execute()
-        )
+        response = supabase.table("face_data").select("user_id, embedding, profiles(full_name)").in_("user_id", student_ids).execute()
 
         students = []
         for row in response.data:
@@ -104,93 +73,122 @@ def get_enrolled_students(course_id: str) -> list[dict]:
             name = profile.get("full_name", "Unknown")
             emb = row.get("embedding")
             if emb:
-                parsed = np.array(
-                    eval(emb) if isinstance(emb, str) else emb
-                )
-                students.append(
-                    {"id": row["user_id"], "name": name, "embedding": parsed}
-                )
+                parsed = np.array(eval(emb) if isinstance(emb, str) else emb)
+                students.append({"id": row["user_id"], "name": name, "embedding": parsed})
         return students
     except Exception as e:
         print(f"[ERROR] Fetching face data: {e}")
         return []
 
+# ---------------------------------------------------------------------------
+#  Cosine Similarity Logic
+# ---------------------------------------------------------------------------
+def cosine_similarity(v1: np.ndarray, v2: np.ndarray) -> float:
+    """Calculate the cosine similarity between two vectors."""
+    dot_product = np.dot(v1, v2)
+    norm_v1 = np.linalg.norm(v1)
+    norm_v2 = np.linalg.norm(v2)
+    if norm_v1 == 0 or norm_v2 == 0:
+        return 0.0
+    return dot_product / (norm_v1 * norm_v2)
 
-def match_face(encoding: np.ndarray, enrolled: list[dict], tolerance: float = RECOG_TOLERANCE):
-    """Return the best-matching enrolled student, or None."""
+def match_face_cosine(encoding: np.ndarray, enrolled: list[dict], threshold: float = COSINE_THRESHOLD):
+    """Return the best-matching enrolled student using cosine similarity."""
     if not enrolled:
         return None
-    known = [s["embedding"] for s in enrolled]
-    distances = face_recognition.face_distance(known, encoding)
-    best_idx = int(np.argmin(distances))
-    if distances[best_idx] <= tolerance:
-        return enrolled[best_idx]
+    
+    best_match = None
+    best_score = -1.0
+    
+    for student in enrolled:
+        score = cosine_similarity(encoding, student["embedding"])
+        if score > best_score:
+            best_score = score
+            best_match = student
+            
+    if best_score > threshold:
+        return best_match
     return None
 
+def crop_with_margin(rgb_frame, x1, y1, x2, y2, margin=CROP_MARGIN):
+    """Crop bounding box with an extra % margin."""
+    h_img, w_img, _ = rgb_frame.shape
+    w, h = x2 - x1, y2 - y1
+    
+    x_margin = int(w * margin)
+    y_margin = int(h * margin)
+    
+    nx1 = max(0, x1 - x_margin)
+    ny1 = max(0, y1 - y_margin)
+    nx2 = min(w_img, x2 + x_margin)
+    ny2 = min(h_img, y2 + y_margin)
+    
+    return rgb_frame[ny1:ny2, nx1:nx2]
 
 # ---------------------------------------------------------------------------
-#  Core Tracked Pipeline
+#  Camera Threading (Solves Latency)
+# ---------------------------------------------------------------------------
+class VideoCaptureThread:
+    """Continuously reads frames from the camera, keeping only the freshest frame to prevent buffer lag."""
+    def __init__(self, src=0):
+        self.cap = cv2.VideoCapture(src)
+        self.q = queue.Queue(maxsize=3)
+        self.stopped = False
+        self.thread = threading.Thread(target=self._update, args=())
+        self.thread.daemon = True
+
+    def start(self):
+        self.thread.start()
+        return self
+
+    def _update(self):
+        while not self.stopped:
+            ret, frame = self.cap.read()
+            if not ret:
+                self.stop()
+                break
+            
+            # If the queue is full, aggressively drop the oldest frame
+            if self.q.full():
+                try:
+                    self.q.get_nowait()
+                except queue.Empty:
+                    pass
+            self.q.put(frame)
+
+    def read(self):
+        return self.q.get()
+
+    def stop(self):
+        self.stopped = True
+        if self.cap.isOpened():
+            self.cap.release()
+
+# ---------------------------------------------------------------------------
+#  Tracked Attendance Pipeline
 # ---------------------------------------------------------------------------
 class TrackedAttendancePipeline:
-    """
-    Wraps YOLOv8 `.track()` calls and maintains three runtime caches:
-
-    identity_cache : dict[int, dict]
-        Maps  track_id → matched student dict  once a face has been
-        recognized.  Identity is *never* re-queried after caching,
-        so the expensive recognition model is amortized.
-
-    frame_counter : dict[int, int]
-        Maps  track_id → number of consecutive frames the track has
-        been alive.  A track must reach CONFIRM_FRAMES before an
-        attendance record is sent.
-
-    confirmed_ids : set[str]
-        Student IDs that have already been sent to the backend in
-        this session.  Prevents duplicate attendance records.
-    """
-
-    def __init__(
-        self,
-        yolo_model: YOLO,
-        enrolled_students: list[dict],
-        course_id: str,
-        backend_url: str = BACKEND_API_URL,
-        confirm_frames: int = CONFIRM_FRAMES,
-    ):
+    def __init__(self, yolo_model: YOLO, enrolled_students: list[dict], course_id: str, backend_url: str = BACKEND_API_URL):
         self.model            = yolo_model
         self.enrolled         = enrolled_students
         self.course_id        = course_id
         self.backend_url      = backend_url
-        self.confirm_frames   = confirm_frames
 
-        # Runtime caches ------------------------------------------------
         self.identity_cache: dict[int, dict]  = {}    # track_id → student
-        self.frame_counter:  dict[int, int]   = defaultdict(int)
-        self.confirmed_ids:  set[str]         = set() # student ids sent
+        self.identity_hits:  dict[int, int]   = defaultdict(int) # track_id -> hit count
+        self.skip_frames:    dict[int, int]   = defaultdict(int) # track_id -> frames left to skip
+        self.confirmed_ids:  set[str]         = set() # student ids marked present
 
-        # Background network pool
         self._executor = ThreadPoolExecutor(max_workers=3)
-        self._global_frame_idx = 0
 
-    # ------------------------------------------------------------------
-    #  Public API
-    # ------------------------------------------------------------------
     def process_frame(self, frame: np.ndarray) -> list[dict]:
-        """
-        Run one frame through the tracker + recognition pipeline.
-
-        Returns a list of dicts suitable for JSON serialization / CV2 overlay:
-            [{ "track_id": int, "x1": int, …, "label": str, "color": str }, …]
-        """
-        self._global_frame_idx += 1
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # ----- 1. YOLOv8 track mode ------------------------------------
+        # 1. YOLOv8 track mode (Persist=True, ByteTrack algorithm)
         results = self.model.track(
             source=frame,
-            persist=True,                  # keep tracker state between calls
-            tracker=BYTETRACK_CFG,         # custom thresholds
+            persist=True,
+            tracker=BYTETRACK_CFG,
             verbose=False,
         )
 
@@ -200,101 +198,103 @@ class TrackedAttendancePipeline:
         for result in results:
             boxes = result.boxes
             if boxes is None or boxes.id is None:
-                continue   # no tracked detections this frame
+                continue
 
-            for box_xyxy, conf_t, track_id_t in zip(
-                boxes.xyxy, boxes.conf, boxes.id
-            ):
+            for box_xyxy, conf_t, track_id_t in zip(boxes.xyxy, boxes.conf, boxes.id):
                 x1, y1, x2, y2 = map(int, box_xyxy)
                 conf   = float(conf_t)
                 tid    = int(track_id_t)
 
                 if conf < 0.30:
-                    continue  # below usable quality
+                    continue
 
                 active_track_ids.add(tid)
-                self.frame_counter[tid] += 1
-
-                # ----- 2. Identity resolution ----------------------------
+                
                 label = "Scanning…"
-                color = "#ff8c00"   # orange
+                color = "#ff8c00"   # Orange
+                
+                hits = self.identity_hits[tid]
 
-                if tid in self.identity_cache:
-                    # Already recognized — FREE identity from cache
+                if tid in self.identity_cache and hits >= REQUIRED_HITS:
+                    # Target identified and consensus reached. Tracking runs free.
                     student = self.identity_cache[tid]
                     label = f"Verified: {student['name']}"
-                    color = "#4edea3"  # emerald
+                    color = "#4edea3"  # Emerald
 
-                elif self._should_recognize():
-                    # Run the heavy recognition model
-                    face_crop = rgb[y1:y2, x1:x2]
-                    if face_crop.size > 0:
-                        face_crop = np.ascontiguousarray(face_crop)
-                        h, w, _ = face_crop.shape
-                        encodings = face_recognition.face_encodings(
-                            face_crop, [(0, w, h, 0)]
-                        )
-                        if encodings:
-                            student = match_face(encodings[0], self.enrolled)
-                            if student:
-                                self.identity_cache[tid] = student
-                                label = f"Verified: {student['name']}"
-                                color = "#4edea3"
-
-                # ----- 3. Frame-buffer consensus -------------------------
-                if tid in self.identity_cache:
-                    student = self.identity_cache[tid]
-                    sid     = student["id"]
-
-                    if (
-                        self.frame_counter[tid] >= self.confirm_frames
-                        and sid not in self.confirmed_ids
-                    ):
-                        self.confirmed_ids.add(sid)
-                        self._executor.submit(
-                            self._send_attendance, sid, student["name"]
-                        )
+                else:
+                    target_identified = False
+                    if tid in self.identity_cache:
+                        # Partial matches visualization
+                        student = self.identity_cache[tid]
+                        label = f"Verifying ({hits}/{REQUIRED_HITS})"
+                        color = "#f2ca44" # Yellow
+                    
+                    if self.skip_frames[tid] > 0:
+                        self.skip_frames[tid] -= 1
+                    else:
+                        # 3. Apply 15% Margin Crop
+                        face_crop = crop_with_margin(rgb, x1, y1, x2, y2, margin=CROP_MARGIN)
+                        if face_crop.size > 0:
+                            face_crop = np.ascontiguousarray(face_crop)
+                            h, w, _ = face_crop.shape
+                            encodings = face_recognition.face_encodings(face_crop, [(0, w, h, 0)])
+                            
+                            if encodings:
+                                # 4. Cosine Similarity Matching
+                                match = match_face_cosine(encodings[0], self.enrolled, threshold=COSINE_THRESHOLD)
+                                if match:
+                                    # We have a match! 
+                                    if tid not in self.identity_cache:
+                                        self.identity_cache[tid] = match
+                                        
+                                    # Ensure it's the same person before incrementing
+                                    if self.identity_cache[tid]['id'] == match['id']:
+                                        self.identity_hits[tid] += 1
+                                        hits = self.identity_hits[tid]
+                                    else:
+                                        # ID switch within track? Start over
+                                        self.identity_cache[tid] = match
+                                        self.identity_hits[tid] = 1
+                                        hits = 1
+                                    
+                                    # 5. Send attendance once target is reached
+                                    if hits >= REQUIRED_HITS:
+                                        sid = match["id"]
+                                        if sid not in self.confirmed_ids:
+                                            self.confirmed_ids.add(sid)
+                                            self._executor.submit(self._send_attendance, sid, match["name"])
+                                        target_identified = True
+                                        
+                            # After attempting recognition, skip the next 10 frames for this ID
+                            # If target is already identified (hits >= 3), it stays identified and we never enter this block again.
+                            if not target_identified:
+                                self.skip_frames[tid] = SKIP_FRAMES
 
                 metadata.append({
                     "track_id": tid,
                     "x1": x1, "y1": y1, "x2": x2, "y2": y2,
                     "label": label,
                     "color": color,
-                    "frames_alive": self.frame_counter[tid],
+                    "hits": hits,
                 })
 
-        # ----- 4. Prune stale tracks ------------------------------------
         self._prune_stale_tracks(active_track_ids)
-
         return metadata
 
     def shutdown(self):
-        """Flush pending network requests on clean exit."""
         self._executor.shutdown(wait=True)
 
-    # ------------------------------------------------------------------
-    #  Private helpers
-    # ------------------------------------------------------------------
-    def _should_recognize(self) -> bool:
-        """Throttle the heavy recognition model to every Nth frame."""
-        return self._global_frame_idx % RECOG_INTERVAL == 0
-
     def _prune_stale_tracks(self, active_ids: set[int]):
-        """
-        Remove tracks from caches that ByteTrack no longer reports.
-        The tracker internally handles re-association via track_buffer,
-        but our caches should stay in sync.
-        """
-        stale = set(self.frame_counter.keys()) - active_ids
+        """Clean track state only when YOLO loses track."""
+        stale = set(self.identity_hits.keys()) - active_ids
         for tid in stale:
-            self.frame_counter.pop(tid, None)
-            # Keep identity_cache entries slightly longer — if ByteTrack
-            # re-assigns the same ID after a brief occlusion, we still
-            # have the identity.  The entry will naturally become
-            # unreachable once YOLO never outputs that ID again.
+            self.identity_hits.pop(tid, None)
+            self.skip_frames.pop(tid, None)
+            # identity_cache is intentionally left alive longer just in case ByteTrack reassigns
+            # after brief occlusion, though ByteTrack usually generates a new ID.
 
     def _send_attendance(self, student_id: str, name: str):
-        """Push attendance record to the Node.js backend."""
+        """Push attendance directly after 3 successful frame matches."""
         payload = {
             "student_id": student_id,
             "course_id":  self.course_id,
@@ -305,78 +305,65 @@ class TrackedAttendancePipeline:
         try:
             res = requests.post(self.backend_url, json=payload, timeout=2)
             if res.status_code in (200, 201):
-                print(f"[TRACKED ✓] Attendance confirmed for {name} ({student_id})")
-            elif res.status_code != 409:
-                print(f"[API ERROR] HTTP {res.status_code} – {res.text}")
+                print(f"[SUCCESS] Attendance logged for {name}")
         except requests.exceptions.RequestException as e:
-            print(f"[NETWORK ERROR] {e}")
+            print(f"[API ERROR] {e}")
 
 
 # ---------------------------------------------------------------------------
-#  Standalone runner (OpenCV window + local camera)
+#  Standalone Runner execution
 # ---------------------------------------------------------------------------
 def main():
     print("=" * 60)
-    print("  YOLOv8 ByteTrack Attendance Pipeline")
+    print("  High-Performance YOLOv8 Tracker (Cosine Sim + Threaded)")
     print("=" * 60)
 
-    # Load model
     model_path = os.path.join(ROOT_DIR, "best.pt")
     if not os.path.exists(model_path):
         model_path = os.path.join(ROOT_DIR, "yolov8s.pt")
-    if not os.path.exists(model_path):
-        model_path = "yolov8s.pt"
+        if not os.path.exists(model_path):
+            model_path = "yolov8s.pt"
 
-    print(f"[*] Loading YOLO model: {model_path}")
     yolo_model = YOLO(model_path)
-
-    # Fetch enrolled embeddings
     enrolled = get_enrolled_students(COURSE_ID)
     print(f"[*] Loaded {len(enrolled)} enrolled face embeddings.")
 
-    # Build pipeline
     pipeline = TrackedAttendancePipeline(
         yolo_model=yolo_model,
         enrolled_students=enrolled,
         course_id=COURSE_ID,
     )
 
-    # Open camera
-    cap = cv2.VideoCapture(CAMERA_ID)
-    if not cap.isOpened():
-        print("[FATAL] Cannot open camera / video source.")
-        return
-
-    print(f"[*] Camera live.  Press 'q' to quit.\n")
+    # Use Threaded Camera for Zero-Lag (Frame-Dropper Queue)
+    print(f"[*] Starting camera thread on source {CAMERA_ID}...")
+    video_stream = VideoCaptureThread(src=CAMERA_ID).start()
+    time.sleep(1.0) # Warm up
 
     try:
         while True:
-            ret, frame = cap.read()
-            if not ret:
+            # Main thread receives the freshest frame instantly
+            frame = video_stream.read()
+            if frame is None:
                 break
-
+                
             frame = cv2.resize(frame, (640, 480))
             detections = pipeline.process_frame(frame)
 
-            # Draw overlays
             for det in detections:
                 x1, y1, x2, y2 = det["x1"], det["y1"], det["x2"], det["y2"]
                 label = det["label"]
-                alive = det["frames_alive"]
-
-                # Color: hex → BGR
                 hex_c = det["color"].lstrip("#")
                 bgr = tuple(int(hex_c[i:i+2], 16) for i in (4, 2, 0))
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
                 cv2.putText(
                     frame,
-                    f"[T{det['track_id']}] {label}  ({alive}f)",
+                    f"[T{det['track_id']}] {label}",
                     (x1, y1 - 10),
                     cv2.FONT_HERSHEY_DUPLEX, 0.55, bgr, 1,
                 )
 
-            cv2.imshow("ByteTrack Attendance Feed", frame)
+            cv2.imshow("ByteTrack Pipeline feed", frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
@@ -384,10 +371,9 @@ def main():
         print("\n[*] Interrupted by user.")
     finally:
         pipeline.shutdown()
-        cap.release()
+        video_stream.stop()
         cv2.destroyAllWindows()
         print("[*] Pipeline shutdown complete.")
-
 
 if __name__ == "__main__":
     main()
